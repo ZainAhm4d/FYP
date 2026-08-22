@@ -1,0 +1,239 @@
+/*
+ * Dashboard themes — applied via a class on <body>.
+ * Default (no class) = light. `.theme-dark` switches page, cards, tabs.
+ * Plotly figure colors are patched separately in dashboard-layout.js.
+ */
+
+body.theme-dark {
+    background-color: #0f172a;
+}
+
+/* Page chrome */
+body.theme-dark #dashboardTitle       { color: #f1f5f9 !important; }
+body.theme-dark #dashboardDescription { color: #94a3b8 !important; }
+
+/* Widget cards */
+body.theme-dark .chart-card {
+    background-color: #1e293b !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+body.theme-dark .chart-card .chart-header {
+    background-color: #16213a !important;
+    border-color: #334155 !important;
+}
+body.theme-dark .chart-card h3,
+body.theme-dark .chart-card .chart-header span {
+    color: #e2e8f0 !important;
+}
+body.theme-dark .chart-card .text-gray-600,
+body.theme-dark .chart-card .text-gray-500 { color: #94a3b8 !important; }
+body.theme-dark .kpi-value { color: #818cf8 !important; }
+
+/* Divider widget */
+body.theme-dark .chart-card .border-gray-200 { border-color: #334155 !important; }
+
+/* Gridstack drag placeholder */
+body.theme-dark .grid-stack-placeholder > .placeholder-content {
+    background: rgba(129, 140, 248, 0.08);
+    border-color: rgba(129, 140, 248, 0.35);
+}
+
+/* ── Dashboard page tabs ─────────────────────────────────────────────────── */
+.dash-tab {
+    padding: 0.5rem 1.1rem;
+    border-radius: 0.75rem 0.75rem 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    border: 1px solid transparent;
+    border-bottom: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color .15s, background-color .15s;
+    white-space: nowrap;
+}
+.dash-tab:hover { color: #4f46e5; background: rgba(99, 102, 241, 0.06); }
+.dash-tab.active {
+    color: #4f46e5;
+    background: #fff;
+    border-color: #e5e7eb;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.04);
+}
+.dash-tab .tab-action {
+    opacity: 0; transition: opacity .15s;
+    color: #9ca3af; font-size: 0.75rem; line-height: 1;
+}
+.dash-tab.active .tab-action, .dash-tab:hover .tab-action { opacity: 1; }
+.dash-tab .tab-action:hover { color: #4f46e5; }
+
+.dash-tabbar {
+    display: flex; align-items: flex-end; gap: 0.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+}
+
+/* ── Toolbar bar: full-width, grouped, uniform ───────────────────────────── */
+.dash-toolbar-bar {
+    display: flex;
+    flex-wrap: nowrap;            /* never stack into a broken column */
+    overflow-x: auto;             /* scroll horizontally on narrow screens — per spec this
+                                      also forces overflow-y to computed 'auto' (clipping),
+                                      no matter what overflow-y is explicitly set to. The
+                                      Export dropdown escapes that via position:fixed in JS
+                                      (view-dashboard.js) instead of fighting this in CSS. */
+    scrollbar-width: thin;
+    gap: 6px;
+    align-items: center;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 8px 10px;
+    box-shadow: 0 1px 3px rgba(15,23,42,.05);
+}
+.dash-toolbar-bar > * { flex-shrink: 0; }
+/* Group ordering via flexbox (Design/Insert | View | Share | Output) */
+.dash-toolbar-bar > * { order: 50; }
+.dash-toolbar-bar #designBtn              { order: 1; }
+.dash-toolbar-bar #widgetDropdownWrapper  { order: 2; }
+.dash-toolbar-bar #refreshBtn             { order: 10; margin-left: 14px; }
+.dash-toolbar-bar #dashAutoRefresh        { order: 11; max-width: 130px; }
+.dash-toolbar-bar #changeLayoutBtn        { order: 12; }
+.dash-toolbar-bar #themeToggleBtn         { order: 13; }
+.dash-toolbar-bar #shareBtn               { order: 20; margin-left: 14px; }
+.dash-toolbar-bar #collaborateBtn         { order: 21; }
+.dash-toolbar-bar #previewDashboardBtn    { order: 29; margin-left: 14px; }
+.dash-toolbar-bar #exportDropdownWrapper  { order: 30; }
+.dash-toolbar-bar #scheduleBtn            { order: 31; }
+.dash-toolbar-bar #designBtn {
+    background: #0d9488;   /* full shorthand so it also clears any background-image —
+                               a gradient here would paint over a plain background-color */
+    color: #fff !important;
+    border: none;
+}
+.dash-toolbar-bar #designBtn:hover { filter: brightness(1.08); }
+
+/* Charts must be able to shrink with their card (flex min-height trap) */
+.chart-card .chart-canvas { min-height: 0; min-width: 0; }
+.chart-card .chart-canvas .plot-container,
+.chart-card .chart-canvas .svg-container { height: 100% !important; }
+
+/* Widget controls: hidden until the card is hovered (clean canvas look) */
+.chart-card .chart-controls { opacity: 0; transition: opacity .15s ease; }
+.chart-card:hover .chart-controls,
+.grid-stack-item:hover .chart-controls { opacity: 1; }
+
+/* ── Dashboard design variables (set by the Design panel) ────────────────── */
+body.dz-canvas,
+body.dz-canvas.theme-dark { background-color: var(--dz-canvas) !important; }
+body.dz-cards .chart-card:not(.h-full.flex.items-center) {
+    background-color: var(--dz-card-bg, #ffffff) !important;
+}
+body.dz-cards .chart-card,
+body .chart-card { border-radius: var(--dz-radius, 12px); }
+body.dz-noshadow .chart-card { box-shadow: none !important; }
+body.dz-border .chart-card { border: 1px solid rgba(100, 116, 139, 0.25); }
+
+/* ── Toolbar: uniform button sizing (was a mix of heights/paddings) ──────── */
+.dash-toolbar { align-items: center; }
+.dash-toolbar .btn,
+.dash-toolbar button.btn {
+    height: 38px;
+    padding: 0 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    border-radius: 10px;
+    line-height: 1;
+}
+.dash-toolbar .btn svg { width: 15px; height: 15px; margin: 0 !important; flex-shrink: 0; }
+
+/* ── Dark theme: full page coverage (not just the background) ────────────── */
+
+/* Toolbar + generic buttons */
+body.theme-dark .btn-outline,
+body.theme-dark .btn-secondary {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+body.theme-dark .btn-outline:hover,
+body.theme-dark .btn-secondary:hover {
+    background-color: #273449 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Page chrome: back link, metadata row, misc grays */
+body.theme-dark main a.text-blue-600 { color: #93c5fd !important; }
+body.theme-dark main .text-gray-500,
+body.theme-dark main .text-gray-600,
+body.theme-dark main .text-gray-400 { color: #94a3b8 !important; }
+
+/* Modals: dark surfaces, readable text, dark inputs */
+body.theme-dark [id$="Modal"] .bg-white {
+    background-color: #1e293b !important;
+    color: #e2e8f0;
+}
+body.theme-dark [id$="Modal"] h2:not([class*="text-white"]),
+body.theme-dark [id$="Modal"] h3:not([class*="text-white"]),
+body.theme-dark [id$="Modal"] .text-gray-800,
+body.theme-dark [id$="Modal"] .text-gray-700 { color: #e2e8f0 !important; }
+body.theme-dark [id$="Modal"] .text-gray-600,
+body.theme-dark [id$="Modal"] .text-gray-500,
+body.theme-dark [id$="Modal"] .text-gray-400 { color: #94a3b8 !important; }
+body.theme-dark [id$="Modal"] input:not([type="color"]):not([type="checkbox"]):not([type="radio"]),
+body.theme-dark [id$="Modal"] select,
+body.theme-dark [id$="Modal"] textarea {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+body.theme-dark [id$="Modal"] .bg-gray-50,
+body.theme-dark [id$="Modal"] .bg-blue-50,
+body.theme-dark [id$="Modal"] .bg-indigo-50 {
+    background-color: #0f172a !important;
+    color: #94a3b8;
+}
+body.theme-dark [id$="Modal"] .border-gray-100,
+body.theme-dark [id$="Modal"] .border-gray-200,
+body.theme-dark [id$="Modal"] .border-gray-300 { border-color: #334155 !important; }
+
+/* Chart canvas surface inside dark cards */
+body.theme-dark .chart-canvas { background-color: transparent; }
+
+/* Toolbar bar + design panel in dark mode */
+body.theme-dark .dash-toolbar-bar {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.theme-dark #designPanel {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+body.theme-dark #designPanel h3 { color: #94a3b8 !important; }
+body.theme-dark #designPanel .text-gray-700 { color: #cbd5e1 !important; }
+body.theme-dark #designPanel .text-gray-500 { color: #94a3b8 !important; }
+body.theme-dark #designPanel select,
+body.theme-dark #designPanel input[type="color"] {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+body.theme-dark #designPanel .border-gray-100,
+body.theme-dark #designPanel .border-gray-200 { border-color: #334155 !important; }
+body.theme-dark #designPanel #dzReset { color: #94a3b8; }
+
+body.theme-dark .dash-tabbar { border-color: #334155; }
+body.theme-dark .dash-tab { color: #94a3b8; }
+body.theme-dark .dash-tab:hover { color: #a5b4fc; background: rgba(129,140,248,0.08); }
+body.theme-dark .dash-tab.active {
+    color: #a5b4fc;
+    background: #1e293b;
+    border-color: #334155;
+}

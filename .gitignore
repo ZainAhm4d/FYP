@@ -1,0 +1,52 @@
+# ── Secrets / environment ──────────────────────────────────────────────────
+.env
+*.env
+!*.env.example
+backend/.env
+
+# ── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+backend/venv/
+env/
+.venv/
+*.egg-info/
+.eggs/
+
+# ── Test / coverage artifacts ──────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+backend/test_app.db
+backend/probe.db
+backend/intent_accuracy_report.txt
+
+# ── Databases ──────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+backend/app.db
+
+# ── User data / uploads (do not commit user datasets) ──────────────────────
+backend/data/uploads/
+backend/data/processed/
+backend/data/exports/
+
+# ── ML model caches ────────────────────────────────────────────────────────
+backend/models/
+*.pkl
+
+# ── Node / frontend build ──────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+
+# ── Editor / OS ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

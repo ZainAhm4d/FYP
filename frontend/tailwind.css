@@ -1,0 +1,6 @@
+/* Tailwind source entry — build with:
+   npx tailwindcss -i tailwind.css -o assets/css/tailwind.build.css --minify
+   (add --watch while working) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

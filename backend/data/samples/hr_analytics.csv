@@ -1,0 +1,16 @@
+employee_id,name,department,position,salary,hire_date,performance_rating,years_of_service
+E001,John Smith,Engineering,Senior Developer,95000,2019-03-15,4.5,5
+E002,Sarah Johnson,Engineering,Tech Lead,110000,2018-06-20,4.8,6
+E003,Michael Brown,Engineering,Junior Developer,65000,2022-01-10,4.2,2
+E004,Emily Davis,Marketing,Marketing Manager,85000,2020-04-12,4.6,4
+E005,David Wilson,Marketing,Social Media Specialist,55000,2021-11-05,4.0,2
+E006,Lisa Anderson,Sales,Sales Director,120000,2017-08-30,4.9,7
+E007,Robert Taylor,Sales,Account Executive,75000,2020-02-14,4.4,4
+E008,Jennifer Martinez,HR,HR Manager,80000,2019-09-01,4.7,5
+E009,William Garcia,HR,Recruiter,60000,2021-05-20,4.3,3
+E010,Mary Rodriguez,Finance,Financial Analyst,72000,2020-10-18,4.5,3
+E011,James Lee,Finance,Accountant,68000,2021-03-22,4.2,3
+E012,Patricia White,Operations,Operations Manager,90000,2018-12-05,4.6,5
+E013,Christopher Harris,Operations,Logistics Coordinator,62000,2022-07-15,4.0,2
+E014,Linda Clark,Customer Support,Support Lead,70000,2019-11-11,4.4,4
+E015,Daniel Lewis,Customer Support,Support Agent,52000,2021-08-30,4.1,3

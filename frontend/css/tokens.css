@@ -1,0 +1,130 @@
+/* ============================================================
+   DESIGN TOKENS — single source of truth for the visual system.
+   Every page loads this BEFORE component styles. Change a value
+   here and it propagates everywhere; never hardcode these in
+   page-level CSS.
+   ============================================================ */
+
+:root {
+  /* ── Color: brand ─────────────────────────────────────────── */
+  --primary-50:  #EEF2FF;
+  --primary-100: #E0E7FF;
+  --primary-300: #A5B4FC;
+  --primary-500: #6366F1;
+  --primary-600: #4F46E5;   /* interactive default */
+  --primary-700: #4338CA;   /* hover / active */
+  --primary-900: #312E81;
+
+  /* Data accent — live sources, freshness, "data is flowing" */
+  --data-500: #14B8A6;
+  --data-600: #0D9488;
+  --data-50:  #F0FDFA;
+
+  /* ── Color: neutrals (slate) ──────────────────────────────── */
+  --ink-900: #0F172A;   /* headings / highest-contrast text */
+  --ink-700: #334155;   /* body text strong */
+  --ink-500: #64748B;   /* secondary text */
+  --ink-400: #94A3B8;   /* placeholder / tertiary */
+  --line-200: #E2E8F0;  /* borders */
+  --line-100: #F1F5F9;  /* hairlines / row stripes */
+  --surface:  #FFFFFF;  /* cards */
+  --canvas:   #F8FAFC;  /* page background */
+
+  /* ── Color: semantic ──────────────────────────────────────── */
+  --success-600: #16A34A;  --success-50: #F0FDF4;
+  --warning-600: #D97706;  --warning-50: #FFFBEB;
+  --danger-600:  #DC2626;  --danger-50:  #FEF2F2;
+
+  /* ── Dark surfaces (dashboard dark theme) ─────────────────── */
+  --dk-canvas:  #0F172A;
+  --dk-surface: #1E293B;
+  --dk-raised:  #273449;
+  --dk-line:    #334155;
+  --dk-text-1:  #F1F5F9;
+  --dk-text-2:  #94A3B8;
+
+  /* ── Typography ───────────────────────────────────────────── */
+  --font-display: "Space Grotesk", system-ui, sans-serif;   /* headings, KPI numerals */
+  --font-body:    "Inter", system-ui, sans-serif;           /* everything else */
+
+  --text-display: 2.75rem;   /* 44px — landing hero */
+  --text-h1: 2rem;           /* 32px — page titles */
+  --text-h2: 1.5rem;         /* 24px — section titles */
+  --text-h3: 1.25rem;        /* 20px — card titles */
+  --text-h4: 1.125rem;       /* 18px */
+  --text-h5: 1rem;           /* 16px */
+  --text-h6: 0.8125rem;      /* 13px — uppercase eyebrow labels */
+  --text-body: 0.9375rem;    /* 15px */
+  --text-sm: 0.8125rem;      /* 13px */
+  --text-xs: 0.75rem;        /* 12px — captions, badges */
+
+  --leading-tight: 1.15;
+  --leading-body: 1.6;
+
+  /* ── Spacing (4px base) ───────────────────────────────────── */
+  --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-6: 24px; --sp-8: 32px;  --sp-12: 48px; --sp-16: 64px;
+  --sp-24: 96px;
+
+  /* ── Radius ───────────────────────────────────────────────── */
+  --r-sm: 6px;    /* inputs, chips */
+  --r-md: 10px;   /* buttons, small cards */
+  --r-lg: 14px;   /* cards, modals */
+  --r-xl: 20px;   /* heroes, banners */
+  --r-pill: 999px;
+
+  /* ── Elevation (soft, three levels — no harsh drops) ──────── */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.05);
+  --shadow-raised: 0 4px 12px rgba(15, 23, 42, 0.08), 0 12px 32px rgba(15, 23, 42, 0.08);
+
+  /* ── Motion ───────────────────────────────────────────────── */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+}
+
+/* ── Base typography application ────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--ink-700);
+  background-color: var(--canvas);
+}
+
+h1, h2, h3, h4, h5, .font-display {
+  font-family: var(--font-display);
+  color: var(--ink-900);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: var(--text-h1); font-weight: 700; }
+h2 { font-size: var(--text-h2); font-weight: 600; }
+h3 { font-size: var(--text-h3); font-weight: 600; }
+h4 { font-size: var(--text-h4); font-weight: 600; }
+h5 { font-size: var(--text-h5); font-weight: 600; }
+h6 {
+  font-family: var(--font-body);
+  font-size: var(--text-h6);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* Numbers align like a terminal — KPIs, tables, metadata */
+.tabular, table td, .kpi-value {
+  font-variant-numeric: tabular-nums;
+}
+.kpi-value { font-family: var(--font-display); }
+
+/* Lucide icon default sizing (replaces emoji) */
+.lucide, [data-lucide] {
+  width: 1.15em;
+  height: 1.15em;
+  stroke-width: 2;
+  vertical-align: -0.18em;
+  display: inline-block;
+}

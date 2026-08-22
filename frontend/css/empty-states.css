@@ -1,0 +1,208 @@
+/**
+ * Empty State Designs
+ * Engaging empty states for better UX when no data is available
+ */
+
+/* Base empty state container */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    min-height: 400px;
+}
+
+/* Empty state icon container */
+.empty-state-icon {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-radius: 50%;
+}
+
+.empty-state-icon svg {
+    width: 60px;
+    height: 60px;
+    color: #9ca3af;
+}
+
+/* Empty state text */
+.empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+
+.empty-state-description {
+    font-size: 1rem;
+    color: #6b7280;
+    max-width: 500px;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Empty state action button */
+.empty-state-action {
+    margin-top: 1rem;
+}
+
+.empty-state-action .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+/* Animated empty state icon */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.empty-state-icon-animated {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Empty state variants */
+
+/* No datasets */
+.empty-state-datasets .empty-state-icon {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.empty-state-datasets .empty-state-icon svg {
+    color: #3b82f6;
+}
+
+/* No dashboards */
+.empty-state-dashboards .empty-state-icon {
+    background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+}
+
+.empty-state-dashboards .empty-state-icon svg {
+    color: #6366f1;
+}
+
+/* No charts */
+.empty-state-charts .empty-state-icon {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.empty-state-charts .empty-state-icon svg {
+    color: #10b981;
+}
+
+/* No results */
+.empty-state-results .empty-state-icon {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.empty-state-results .empty-state-icon svg {
+    color: #f59e0b;
+}
+
+/* Error state */
+.empty-state-error .empty-state-icon {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.empty-state-error .empty-state-icon svg {
+    color: #ef4444;
+}
+
+/* Compact empty state for smaller sections */
+.empty-state-compact {
+    min-height: 200px;
+    padding: 2rem 1rem;
+}
+
+.empty-state-compact .empty-state-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+}
+
+.empty-state-compact .empty-state-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.empty-state-compact .empty-state-title {
+    font-size: 1.25rem;
+}
+
+.empty-state-compact .empty-state-description {
+    font-size: 0.875rem;
+}
+
+/* Inline empty state (for cards/modals) */
+.empty-state-inline {
+    min-height: auto;
+    padding: 1.5rem;
+}
+
+.empty-state-inline .empty-state-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.75rem;
+}
+
+.empty-state-inline .empty-state-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.empty-state-inline .empty-state-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-inline .empty-state-description {
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+/* Loading state empty placeholder */
+.empty-state-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.empty-state-loading .empty-state-icon {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .empty-state {
+        min-height: 300px;
+        padding: 2rem 1rem;
+    }
+    
+    .empty-state-icon {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .empty-state-icon svg {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .empty-state-title {
+        font-size: 1.25rem;
+    }
+    
+    .empty-state-description {
+        font-size: 0.875rem;
+    }
+}

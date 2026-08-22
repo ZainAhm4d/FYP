@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — BI Dashboard</title>
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="assets/css/tailwind.build.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <!-- Teal reference-style reskin (recolors indigo/blue -> teal, Nunito/Plus Jakarta Sans fonts) -->
+    <link rel="stylesheet" href="css/teal-theme.css">
+    <style>
+        /* Admin page — visual language borrowed from frontend-reference/admin
+           (stat cards with icon circles, pill nav tabs, mini-avatar table
+           rows, role/status badges). Real data only — this app has no
+           subscriptions/MRR, so those reference widgets aren't reproduced. */
+        .admin-stat-card { background:#fff; border:1px solid #e2e8f0; border-radius:18px; padding:22px 20px; }
+        .admin-stat-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+        .admin-stat-value { font-family:'Nunito',sans-serif; font-weight:900; font-size:1.6rem; color:#1a2332; margin-bottom:2px; }
+        .admin-stat-label { font-size:.78rem; color:#94a3b8; font-weight:500; }
+        .admin-tab {
+            display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:12px;
+            font-size:.875rem; font-weight:600; color:#64748b; background:#fff; border:1px solid #e2e8f0;
+            transition:all .15s; cursor:pointer;
+        }
+        .admin-tab:hover { background:var(--primary-50); color:var(--primary-700); }
+        .admin-tab.active { background:var(--primary-50); color:var(--primary-700); border-color:var(--primary-100); }
+        .admin-card { background:#fff; border:1px solid #e2e8f0; border-radius:18px; overflow:hidden; }
+        .admin-mini-avatar {
+            width:32px; height:32px; border-radius:9px; background:var(--primary-600); color:#fff;
+            font-weight:800; font-size:.75rem; display:flex; align-items:center; justify-content:center;
+            font-family:'Nunito',sans-serif; flex-shrink:0;
+        }
+        .admin-role-badge { font-size:.7rem; font-weight:700; padding:3px 10px; border-radius:20px; background:#fef3c7; color:#d97706; }
+        .admin-status-dot { width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:5px; }
+        .admin-status-dot.active { background:#22c55e; }
+        .admin-status-dot.inactive { background:#94a3b8; }
+        .admin-table th { text-align:left; font-size:.72rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em; padding:0 16px 10px; }
+        .admin-table td { padding:12px 16px; border-top:1px solid #f1f5f9; font-size:.85rem; color:#2d3748; }
+        .admin-table tr:hover td { background:#f9fafb; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="navbar-container"></div>
+
+    <main class="max-w-7xl mx-auto px-6 py-10">
+        <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <span class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:var(--primary-50);">
+                    <i data-lucide="shield" style="width:26px;height:26px;color:var(--primary-600);"></i>
+                </span>
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-800" style="font-family:'Nunito',sans-serif;">Admin Portal</h1>
+                    <p class="text-gray-500 text-base sm:text-lg mt-1">User accounts, lifecycle and audit trail</p>
+                </div>
+            </div>
+            <button onclick="loadStats(); loadUsers();"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-teal-400 hover:text-teal-700 transition-colors">
+                <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>
+                Refresh
+            </button>
+        </div>
+
+        <!-- Stats -->
+        <div id="adminStats" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8"></div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 flex-wrap">
+            <button data-tab="users" class="admin-tab active">
+                <i data-lucide="users" style="width:15px;height:15px;"></i>Users
+            </button>
+            <button data-tab="deleted" class="admin-tab">
+                <i data-lucide="trash-2" style="width:15px;height:15px;"></i>Deleted (recoverable)
+            </button>
+            <button data-tab="audit" class="admin-tab">
+                <i data-lucide="scroll-text" style="width:15px;height:15px;"></i>Audit log
+            </button>
+        </div>
+
+        <!-- Users tab -->
+        <section id="tab-users" class="admin-card">
+            <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-3">
+                <input id="userSearch" type="text" placeholder="Search email or name…"
+                       class="flex-1 min-w-56 border border-gray-300 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2" style="--tw-ring-color:var(--primary-300);">
+                <button id="addUserBtn" class="text-sm font-semibold text-white px-4 py-2 rounded-lg transition-colors" style="background:var(--primary-600);">
+                    + Add user
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm admin-table">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="pt-3">User</th>
+                            <th class="pt-3">Status</th>
+                            <th class="pt-3">Datasets</th>
+                            <th class="pt-3">Dashboards</th>
+                            <th class="pt-3">Last login</th>
+                            <th class="pt-3">Joined</th>
+                            <th class="pt-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Deleted tab -->
+        <section id="tab-deleted" class="hidden admin-card p-6">
+            <p class="text-sm text-gray-500 mb-4">
+                Soft-deleted accounts stay recoverable for <strong>30 days</strong>, then a daily job
+                permanently removes their data and files.
+            </p>
+            <div id="deletedList" class="space-y-2"></div>
+        </section>
+
+        <!-- Audit tab -->
+        <section id="tab-audit" class="hidden admin-card p-6">
+            <div id="auditList" class="space-y-1 text-sm font-mono"></div>
+        </section>
+    </main>
+
+    <!-- Add user modal -->
+    <div id="addUserModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4" style="font-family:'Nunito',sans-serif;">Add user</h2>
+            <div class="space-y-3">
+                <input id="newUserEmail" type="email" placeholder="Email"
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                <input id="newUserName" type="text" placeholder="Full name (optional)"
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                <input id="newUserPassword" type="password" placeholder="Password (8+ chars, upper, number, special)"
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm">
+                <label class="flex items-center gap-2 text-sm text-gray-600">
+                    <input id="newUserAdmin" type="checkbox" class="w-4 h-4"> Grant admin privileges
+                </label>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button id="cancelAddUser" class="flex-1 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
+                <button id="confirmAddUser" class="flex-1 text-white rounded-lg py-2.5 text-sm font-bold" style="background:var(--primary-600);">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete confirmation modal (typed email confirm) -->
+    <div id="deleteUserModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <h2 class="text-xl font-bold text-red-700 mb-2" style="font-family:'Nunito',sans-serif;">Delete account</h2>
+            <p class="text-sm text-gray-600 mb-1">
+                <span id="deleteUserEmail" class="font-semibold"></span> will be locked out immediately.
+            </p>
+            <p class="text-xs text-gray-500 mb-4">
+                The account and its data stay recoverable for 30 days, then everything
+                (datasets, dashboards, files) is permanently removed.
+            </p>
+            <label class="block text-xs font-semibold text-gray-500 mb-1">Type the email to confirm</label>
+            <input id="deleteUserConfirmInput" type="text"
+                   class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm mb-4">
+            <div class="flex gap-3">
+                <button id="cancelDeleteUser" class="flex-1 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
+                <button id="confirmDeleteUser" disabled
+                        class="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white rounded-lg py-2.5 text-sm font-bold">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/components/notifications.js"></script>
+    <script src="js/components/loading.js"></script>
+    <script src="js/components/navbar.js"></script>
+    <script src="js/pages/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Navbar.init('admin');
+            initAdminPage();
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

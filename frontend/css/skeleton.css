@@ -1,0 +1,202 @@
+/**
+ * Skeleton Loading Screens
+ * Professional loading states for better perceived performance
+ */
+
+/* Base skeleton animation */
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 0%,
+        #e0e0e0 20%,
+        #f0f0f0 40%,
+        #f0f0f0 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Skeleton variants */
+.skeleton-text {
+    height: 1rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-text-short {
+    width: 60%;
+}
+
+.skeleton-text-long {
+    width: 80%;
+}
+
+.skeleton-title {
+    height: 2rem;
+    width: 40%;
+    margin-bottom: 1rem;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.skeleton-button {
+    height: 2.5rem;
+    width: 120px;
+    border-radius: 6px;
+}
+
+.skeleton-card {
+    height: 200px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.skeleton-chart {
+    height: 400px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+/* Dataset list skeleton */
+.skeleton-dataset-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.skeleton-dataset-row .skeleton-avatar {
+    flex-shrink: 0;
+}
+
+.skeleton-dataset-row .skeleton-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Dashboard card skeleton */
+.skeleton-dashboard-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-dashboard-card .skeleton-title {
+    margin-bottom: 0.75rem;
+}
+
+.skeleton-dashboard-card .skeleton-text {
+    margin-bottom: 1rem;
+}
+
+.skeleton-dashboard-card .skeleton-footer {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Query form skeleton */
+.skeleton-query-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.skeleton-query-form .skeleton-label {
+    height: 1rem;
+    width: 120px;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-query-form .skeleton-input {
+    height: 2.5rem;
+    width: 100%;
+    border-radius: 6px;
+}
+
+/* Table skeleton */
+.skeleton-table {
+    width: 100%;
+}
+
+.skeleton-table-header {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.skeleton-table-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Grid skeleton (for dashboard/saved dashboards) */
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Container variant */
+.skeleton-container {
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+}
+
+/* Pulse variant (alternative to shimmer) */
+@keyframes skeleton-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.skeleton-pulse {
+    animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    background: #e5e7eb;
+}
+
+/* Dark mode skeleton support (future-proof) */
+@media (prefers-color-scheme: dark) {
+    .skeleton {
+        background: linear-gradient(
+            90deg,
+            #2d3748 0%,
+            #1a202c 20%,
+            #2d3748 40%,
+            #2d3748 100%
+        );
+    }
+    
+    .skeleton-pulse {
+        background: #2d3748;
+    }
+}

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Builder - BI Dashboard Generator</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="assets/css/tailwind.build.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Plotly.js CDN -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/tooltips.css">
+    <link rel="stylesheet" href="css/empty-states.css">
+    <link rel="stylesheet" href="css/form-validation.css">
+    <link rel="stylesheet" href="css/components.css">
+    <!-- Teal reference-style reskin (recolors indigo/blue -> teal, Nunito/Plus Jakarta Sans fonts) -->
+    <link rel="stylesheet" href="css/teal-theme.css">
+</head>
+<body class="font-['Inter'] bg-gray-50">
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="pt-8 px-4 sm:px-6 lg:px-8 pb-16 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            <!-- Page header -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm py-8 px-6 sm:px-8 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:var(--primary-50);">
+                        <svg class="w-7 h-7" fill="none" stroke="var(--primary-600)" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                        </svg>
+                    </span>
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-800">Dashboard Builder</h1>
+                        <p class="text-gray-500 text-base sm:text-lg mt-1">Arrange charts into a dashboard, then save and share it.</p>
+                    </div>
+                </div>
+                <div class="flex gap-2.5 flex-shrink-0">
+                    <a href="upload.html" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-sm font-semibold border transition-colors"
+                       style="border-color:var(--line-200); color:var(--ink-700); background:var(--surface);">
+                        <i data-lucide="upload" style="width:15px;height:15px;color:var(--ink-400);"></i>Upload Data
+                    </a>
+                    <a href="query.html" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-sm font-semibold text-white transition-colors"
+                       style="background:var(--primary-600);">
+                        <i data-lucide="plus" style="width:15px;height:15px;"></i>Create Charts
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Actions Grid -->
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <!-- Quick Action Card 1 -->
+                <a href="upload.html" class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6 border-2 border-transparent hover:border-blue-500 transform hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Upload Dataset</h3>
+                    <p class="text-sm text-gray-600">Import CSV files to analyze your data</p>
+                </a>
+
+                <!-- Quick Action Card 2 -->
+                <a href="datasets.html" class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6 border-2 border-transparent hover:border-green-500 transform hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">View Datasets</h3>
+                    <p class="text-sm text-gray-600">Manage your uploaded data files</p>
+                </a>
+
+                <!-- Quick Action Card 3 -->
+                <a href="query.html" class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6 border-2 border-transparent hover:border-indigo-500 transform hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Query Builder</h3>
+                    <p class="text-sm text-gray-600">Create charts with AI queries</p>
+                </a>
+
+                <!-- Quick Action Card 4 -->
+                <a href="saved-dashboards.html" class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all p-6 border-2 border-transparent hover:border-orange-500 transform hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Saved Dashboards</h3>
+                    <p class="text-sm text-gray-600">Access your saved visualizations</p>
+                </a>
+            </div>
+
+            <!-- Dashboard Builder Section -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Dashboard Builder</h2>
+                        <p class="text-gray-600">Arrange your charts and save your custom dashboard</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button id="changeLayoutBtn" class="btn btn-secondary px-4 py-2">
+                            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z"></path>
+                            </svg>
+                            Change Layout
+                        </button>
+                        <button id="clearDashboardBtn" class="btn btn-outline px-4 py-2">
+                            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Clear All
+                        </button>
+                        <button id="saveDashboardBtn" class="btn btn-primary px-4 py-2" disabled>
+                            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                            </svg>
+                            Save Dashboard
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chart Count Badge -->
+                <div class="mb-6 flex flex-wrap items-center gap-3">
+                    <span id="chartCountBadge" class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 shadow-sm">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                        </svg>
+                        <span id="chartCount">0</span>&nbsp;staged chart(s) — <strong>&nbsp;draft, not saved yet</strong>
+                    </span>
+                    <span class="text-xs text-gray-500">
+                        Staged charts stay here (even across visits) until you <strong>Save Dashboard</strong>,
+                        remove them with ✕, or <strong>Clear All</strong>.
+                    </span>
+                </div>
+
+                <!-- Dashboard Grid Container -->
+                <div id="dashboardGrid" class="dashboard-grid"></div>
+
+                <!-- Empty State (shown when no charts) -->
+                <div id="emptyState" class="text-center py-16 px-4">
+                    <div class="max-w-md mx-auto">
+                        <div class="w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3">No Charts Yet</h3>
+                        <p class="text-gray-600 mb-6 text-lg">
+                            Get started by creating your first visualization from the Query Builder
+                        </p>
+
+                        <!-- Getting Started Steps -->
+                        <div class="bg-blue-50 rounded-lg p-6 mb-6 text-left">
+                            <h4 class="font-semibold text-gray-800 mb-3">Getting Started:</h4>
+                            <ol class="space-y-2 text-sm text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+                                    <span>Upload your dataset (CSV file)</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+                                    <span>Go to Query Builder and select your dataset</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+                                    <span>Choose a query template and generate charts</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+                                    <span>Add charts to dashboard and save</span>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <a href="query.html" class="btn btn-primary inline-flex items-center px-8 py-3 text-lg shadow-lg hover:shadow-xl transition-all">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Go to Query Builder
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Save Dashboard Modal -->
+    <div id="saveDashboardModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-2xl font-bold text-gray-800">Save Dashboard</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="saveDashboardForm">
+                <div class="mb-4">
+                    <label for="dashboardName" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Dashboard Name *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="dashboardName" 
+                        name="dashboardName"
+                        class="input w-full" 
+                        placeholder="e.g., Q4 Sales Analysis"
+                        required
+                        maxlength="100"
+                    />
+                </div>
+                
+                <div class="mb-6">
+                    <label for="dashboardDescription" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Description (optional)
+                    </label>
+                    <textarea 
+                        id="dashboardDescription" 
+                        name="dashboardDescription"
+                        class="input w-full" 
+                        rows="3"
+                        placeholder="Brief description of this dashboard..."
+                        maxlength="500"
+                    ></textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <span id="descCharCount">0</span>/500 characters
+                    </p>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="button" id="cancelModalBtn" class="btn btn-outline flex-1">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary flex-1">
+                        Save Dashboard
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Layout Selection Modal -->
+    <div id="layoutModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Choose Layout</h3>
+                <button id="closeLayoutModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="grid">
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Grid (Auto)</p>
+                </button>
+                
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="1-col">
+                    <div class="flex flex-col gap-2 mb-3">
+                        <div class="bg-gray-300 h-8 rounded"></div>
+                        <div class="bg-gray-300 h-8 rounded"></div>
+                        <div class="bg-gray-300 h-8 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Single Column</p>
+                </button>
+                
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="2-col">
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Two Columns</p>
+                </button>
+                
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="3-col">
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Three Columns</p>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center text-gray-600">
+            <p>© 2024 BI Dashboard Generator. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils/validation.js"></script>
+    <script src="js/components/skeleton-loader.js"></script>
+    <script src="js/components/tooltip.js"></script>
+    <script src="js/components/empty-states.js"></script>
+    <script src="js/components/notifications.js"></script>
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/loading.js"></script>
+    
+    <!-- Visualization Modules -->
+    <script src="js/visualization/chart-renderer.js"></script>
+    <script src="js/visualization/dashboard-layout.js"></script>
+    
+    <!-- Dashboard Page Logic -->
+    <script src="js/pages/dashboard.js"></script>
+    
+    <script>
+        // Require authentication
+        Auth.requireAuth();
+
+        // Initialize navbar
+        Navbar.init('dashboard');
+
+        // NOTE: initDashboardPage() is invoked by dashboard.js's own
+        // DOMContentLoaded handler (which also checks DashboardLayout loaded).
+        // Registering it here too made the page initialize TWICE and render
+        // every staged chart twice.
+    </script>
+    <script>
+    (function () {
+        function renderIcons() { if (window.lucide) { try { lucide.createIcons(); } catch (_) {} } }
+        let t = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            renderIcons();
+            new MutationObserver(() => { clearTimeout(t); t = setTimeout(renderIcons, 80); })
+                .observe(document.body, { childList: true, subtree: true });
+        });
+    })();
+    </script>
+</body>
+</html>

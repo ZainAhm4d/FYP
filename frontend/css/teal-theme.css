@@ -1,0 +1,229 @@
+/**
+ * Teal reskin override - remaps the blue/indigo Tailwind utility classes
+ * actually used across the app (including JS-rendered markup) to the
+ * reference design's teal palette, without touching Tailwind or JS.
+ * Auto-generated from a full-codebase class inventory - regenerate if new
+ * blue-*/indigo-* utility classes are introduced elsewhere.
+ * Load AFTER css/tokens.css and assets/css/tailwind.build.css.
+ */
+
+:root {
+  --primary-50:  #f0fdfa !important;
+  --primary-100: #ccfbf1 !important;
+  --primary-300: #5eead4 !important;
+  --primary-500: #14b8a6 !important;
+  --primary-600: #0d9488 !important;
+  --primary-700: #0f766e !important;
+  --primary-800: #115e59 !important;   /* undefined in tokens.css; navbar's brand-mark gradient
+                                          falls back to a hardcoded indigo (#3730A3) without this */
+  --primary-900: #134e4a !important;
+  --font-display: 'Nunito', 'Space Grotesk', system-ui, sans-serif !important;
+  --font-body: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
+
+  /* main.css defines its OWN separate legacy variable system (unrelated to
+     tokens.css's --primary-*), still used by .btn/.card/.alert in
+     components.css. Missing this was the reason "Save Dashboard",
+     "Change Layout", and drop-zone hover states stayed blue. */
+  --color-primary: #0d9488 !important;
+  --color-secondary: #14b8a6 !important;
+}
+
+/* !important needed: some pages hardcode a Tailwind body class="font-['Inter']",
+   a CLASS selector that outranks a plain element selector regardless of order. */
+body, input, select, textarea, button { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important; }
+h1, h2, h3, h4, h5, h6, .font-display { font-family: 'Nunito', 'Space Grotesk', sans-serif !important; font-weight: 800; }
+
+/* Hardcoded hex blues that bypass CSS variables entirely (components.css,
+   tooltips.css, empty-states.css, form-validation.css) — must be targeted
+   by selector since there's no variable indirection to override. */
+#dropZone.drag-over, #dropZone:hover { border-color: #0d9488 !important; background-color: #f0fdfa !important; }
+/* .btn/.btn-primary/.btn-secondary (components.css) read var(--color-primary),
+   already overridden above — hardcoded here too as a direct, unambiguous
+   guarantee that doesn't depend on custom-property cascade at all. */
+.btn-primary { background-color: #0d9488 !important; }
+.btn-primary:hover:not(:disabled) { background-color: #0f766e !important; box-shadow: 0 4px 12px rgba(13,148,136,0.4) !important; }
+.btn-secondary { color: #0d9488 !important; border-color: #0d9488 !important; }
+.btn-secondary:hover:not(:disabled) { background-color: #0d9488 !important; color: #fff !important; }
+.alert-info { background-color: #ccfbf1 !important; }
+.chart-canvas.loading::after { border-top-color: #0d9488 !important; }
+.tooltip-text.tooltip-info { background-color: #0d9488 !important; }
+.tooltip-text.tooltip-info::after { border-color: #0d9488 transparent transparent transparent !important; }
+.empty-state-datasets .empty-state-icon { background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%) !important; }
+.empty-state-datasets .empty-state-icon svg { color: #0d9488 !important; }
+.empty-state-dashboards .empty-state-icon svg { color: #14b8a6 !important; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #0d9488 !important; }
+.form-feedback.info-feedback { color: #0f766e !important; }
+.form-feedback.info-feedback .form-feedback-icon { fill: #0d9488 !important; }
+.form-validation-icon.icon-loading { color: #0d9488 !important; }
+
+/* Unify primary action buttons to ONE brand color. A handful of buttons were
+   built in green/emerald/purple instead of blue/indigo, so the class-family
+   remap above never touched them — same "primary CTA" role, different
+   color, on the same page as buttons that already read teal. Semantic
+   status colors (delete=red, deactivate=amber, reactivate=green) are left
+   alone on purpose; only true brand/action buttons are targeted here. */
+#nlpExecuteBtn,
+#addToDashboardButton {
+  background: #0d9488 !important;
+  --tw-gradient-from: #0d9488 !important;
+  --tw-gradient-to: #0f766e !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+#nlpExecuteBtn:hover, #addToDashboardButton:hover { background: #0f766e !important; }
+/* upload.html's Google Sheets source-picker, selected/active state */
+.source-btn[data-source="google_sheets"] {
+  border-color: #14b8a6 !important;
+  background-color: #f0fdfa !important;
+  color: #0f766e !important;
+}
+/* datasets.js "Create link" button on a suggested relationship card */
+button.bg-emerald-600 { background-color: #0d9488 !important; }
+button.bg-emerald-600:hover, .hover\:bg-emerald-700:hover { background-color: #0f766e !important; }
+/* query.html dataset-selection card — was purple (#7c3aed), off-brand */
+.dataset-option-card:hover { border-color: #14b8a6 !important; box-shadow: 0 0 0 3px rgba(20,184,166,0.1) !important; }
+.dataset-option-card.selected { border-color: #0d9488 !important; background: #f0fdfa !important; }
+/* dataset-report.html tab underline (Operations Log / Raw Data / Anomalies...) */
+.tab-btn.active { border-bottom-color: #0d9488 !important; color: #0d9488 !important; }
+
+.bg-blue-50 { background-color: #f0fdfa !important; }
+.bg-blue-100 { background-color: #ccfbf1 !important; }
+.bg-blue-600 { background-color: #0d9488 !important; }
+.bg-blue-700 { background-color: #0f766e !important; }
+.border-blue-100 { border-color: #ccfbf1 !important; }
+.border-blue-200 { border-color: #99f6e4 !important; }
+.border-blue-400 { border-color: #2dd4bf !important; }
+.border-blue-500 { border-color: #14b8a6 !important; }
+.border-blue-600 { border-color: #0d9488 !important; }
+.text-blue-100 { color: #ccfbf1 !important; }
+.text-blue-500 { color: #14b8a6 !important; }
+.text-blue-600 { color: #0d9488 !important; }
+.text-blue-700 { color: #0f766e !important; }
+.text-blue-800 { color: #0f766e !important; }
+.text-blue-900 { color: #0f766e !important; }
+.ring-blue-400 { --tw-ring-color: #2dd4bf !important; }
+.ring-blue-500 { --tw-ring-color: #14b8a6 !important; }
+.from-blue-50 { --tw-gradient-from: #f0fdfa !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-blue-100 { --tw-gradient-from: #ccfbf1 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-blue-200 { --tw-gradient-from: #99f6e4 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-blue-500 { --tw-gradient-from: #14b8a6 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-blue-600 { --tw-gradient-from: #0d9488 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-blue-700 { --tw-gradient-from: #0f766e !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.to-blue-50 { --tw-gradient-to: #f0fdfa !important; }
+.to-blue-600 { --tw-gradient-to: #0d9488 !important; }
+.to-blue-700 { --tw-gradient-to: #0f766e !important; }
+.via-blue-700 { --tw-gradient-stops: var(--tw-gradient-from), #0f766e, var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.hover\:bg-blue-50:hover { background-color: #f0fdfa !important; }
+.hover\:bg-blue-700:hover { background-color: #0f766e !important; }
+.hover\:border-blue-400:hover { border-color: #2dd4bf !important; }
+.hover\:border-blue-500:hover { border-color: #14b8a6 !important; }
+.hover\:text-blue-500:hover { color: #14b8a6 !important; }
+.hover\:text-blue-600:hover { color: #0d9488 !important; }
+.hover\:text-blue-700:hover { color: #0f766e !important; }
+.hover\:text-blue-800:hover { color: #0f766e !important; }
+.focus\:border-blue-500:focus { border-color: #14b8a6 !important; }
+.focus\:ring-blue-400:focus { --tw-ring-color: #2dd4bf !important; }
+.focus\:ring-blue-500:focus { --tw-ring-color: #14b8a6 !important; }
+
+.bg-indigo-50 { background-color: #f0fdfa !important; }
+.bg-indigo-100 { background-color: #ccfbf1 !important; }
+.bg-indigo-500 { background-color: #14b8a6 !important; }
+.bg-indigo-600 { background-color: #0d9488 !important; }
+.bg-indigo-700 { background-color: #0f766e !important; }
+.border-indigo-100 { border-color: #ccfbf1 !important; }
+.border-indigo-200 { border-color: #99f6e4 !important; }
+.border-indigo-300 { border-color: #5eead4 !important; }
+.border-indigo-400 { border-color: #2dd4bf !important; }
+.border-indigo-500 { border-color: #14b8a6 !important; }
+.border-indigo-600 { border-color: #0d9488 !important; }
+.text-indigo-400 { color: #2dd4bf !important; }
+.text-indigo-500 { color: #14b8a6 !important; }
+.text-indigo-600 { color: #0d9488 !important; }
+.text-indigo-700 { color: #0f766e !important; }
+.text-indigo-800 { color: #0f766e !important; }
+.text-indigo-900 { color: #0f766e !important; }
+.ring-indigo-400 { --tw-ring-color: #2dd4bf !important; }
+.ring-indigo-500 { --tw-ring-color: #14b8a6 !important; }
+.from-indigo-50 { --tw-gradient-from: #f0fdfa !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-indigo-100 { --tw-gradient-from: #ccfbf1 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-indigo-500 { --tw-gradient-from: #14b8a6 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-indigo-600 { --tw-gradient-from: #0d9488 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.from-indigo-700 { --tw-gradient-from: #0f766e !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.to-indigo-50 { --tw-gradient-to: #f0fdfa !important; }
+.to-indigo-100 { --tw-gradient-to: #ccfbf1 !important; }
+.to-indigo-600 { --tw-gradient-to: #0d9488 !important; }
+.to-indigo-700 { --tw-gradient-to: #0f766e !important; }
+.to-indigo-800 { --tw-gradient-to: #115e59 !important; }
+.via-indigo-50 { --tw-gradient-stops: var(--tw-gradient-from), #f0fdfa, var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.via-indigo-200 { --tw-gradient-stops: var(--tw-gradient-from), #99f6e4, var(--tw-gradient-to, rgb(45 212 191 / 0)) !important; }
+.hover\:bg-indigo-50:hover { background-color: #f0fdfa !important; }
+.hover\:bg-indigo-100:hover { background-color: #ccfbf1 !important; }
+.hover\:bg-indigo-700:hover { background-color: #0f766e !important; }
+.hover\:border-indigo-300:hover { border-color: #5eead4 !important; }
+.hover\:border-indigo-500:hover { border-color: #14b8a6 !important; }
+.hover\:text-indigo-700:hover { color: #0f766e !important; }
+.hover\:text-indigo-800:hover { color: #0f766e !important; }
+.focus\:border-indigo-500:focus { border-color: #14b8a6 !important; }
+.focus\:ring-indigo-400:focus { --tw-ring-color: #2dd4bf !important; }
+.focus\:ring-indigo-500:focus { --tw-ring-color: #14b8a6 !important; }
+
+/* Missing Tailwind utility: tailwind.build.css is a static pre-built file,
+   not regenerated live, so a class introduced after the last build (like
+   this one, used by the schedule modal's day-of-month grid) silently does
+   nothing — the grid collapses to one full-width item per row instead of 7
+   columns. Provided directly here rather than depending on a rebuild. */
+.grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
+
+/* Safety net: the schedule modal's card had no height cap, so the broken
+   grid above could grow it past the viewport and push its own close button
+   off-screen — the exact "stuck, can't close" symptom. Capped narrowly to
+   this one modal rather than every [id$="Modal"] site-wide, since other
+   modals aren't reported broken and a blanket rule risks changing their
+   working layout unnecessarily. */
+#scheduleModal > div { max-height: 90vh; overflow-y: auto; }
+
+/* Dataset Preview modal — components.css's generic .modal-content caps
+   max-width at 600px (a plain, non-!important rule loaded after Tailwind,
+   so it silently wins over the max-w-6xl utility already on this modal).
+   Widened to a large, near-fullscreen "data editor" panel (Power BI's
+   Transform Data window is the reference point) via a more specific
+   selector rather than !important, so it always wins regardless of CSS
+   load order. */
+#previewModal .modal-content {
+    max-width: 96vw;
+    width: 96vw;
+    max-height: 94vh;
+    padding: 1.75rem 2rem;
+}
+#previewModal #previewContent {
+    max-height: calc(94vh - 160px);
+    overflow: auto;
+}
+
+/* Preview modal action bar (Browse Full Data / Highlight Issues / Review
+   Cleaning / Review Manually) — hardcoded here rather than relying on
+   Tailwind utility classes like border-purple-400/text-purple-700, since
+   assets/css/tailwind.build.css is a static pre-built file and classes
+   introduced after the last build (or a nonexistent .btn-outline class)
+   silently render as nothing, which is exactly why these buttons showed up
+   unstyled/borderless. Each button sets its own --accent; .active matches
+   the solid "Use This Dataset" look for whichever view is currently open. */
+.preview-action-btn {
+    background: #fff;
+    border: 2px solid var(--accent, #0d9488) !important;
+    color: var(--accent, #0d9488) !important;
+    border-radius: 8px;
+    transition: background-color .15s ease, color .15s ease;
+}
+.preview-action-btn:hover:not(:disabled) {
+    background: var(--accent, #0d9488);
+    color: #fff !important;
+}
+.preview-action-btn.active {
+    background: var(--accent, #0d9488);
+    color: #fff !important;
+}
+.preview-action-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+

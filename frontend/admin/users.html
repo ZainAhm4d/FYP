@@ -1,0 +1,290 @@
+<!-- frontend/pages/admin/users.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Users — TutorAI Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--teal:#2dd4bf;--teal-dark:#14b8a6;--teal-soft:#e6faf8;--dark:#1a2332;--dark2:#2d3748;--gray:#64748b;--gray-light:#94a3b8;--bg:#f0fafa;--white:#fff;--border:#e2e8f0;--red:#ef4444;--green:#22c55e;--amber:#f59e0b}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--dark);display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;z-index:50}
+.sidebar-logo{display:flex;align-items:center;gap:8px;padding:0 20px 24px;font-family:'Nunito',sans-serif;font-weight:900;font-size:1.15rem;color:var(--dark);border-bottom:1px solid var(--border);margin-bottom:16px;text-decoration:none}
+.sidebar-logo svg{color:var(--teal)}
+.admin-badge{font-size:.65rem;font-weight:800;background:#fef3c7;color:#d97706;padding:2px 7px;border-radius:6px;margin-left:4px}
+.sidebar-nav{flex:1;padding:0 12px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--gray);font-weight:600;font-size:.875rem;text-decoration:none;transition:all .2s;margin-bottom:4px}
+.nav-item:hover,.nav-item.active{background:var(--teal-soft);color:var(--teal-dark)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-bottom{padding:12px 20px;border-top:1px solid var(--border)}
+.admin-info{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--bg)}
+.admin-avatar{width:36px;height:36px;border-radius:10px;background:#f59e0b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.875rem;flex-shrink:0}
+.admin-name{font-weight:700;font-size:.825rem;color:var(--dark)}
+.admin-role{font-size:.7rem;color:var(--gray-light)}
+.logout-btn{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px;padding:8px 10px;border:none;background:none;color:var(--gray);font-size:.825rem;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
+.logout-btn:hover{background:#fef2f2;color:var(--red)}
+.main{margin-left:240px;flex:1;padding:32px 36px}
+.page-header{margin-bottom:24px}
+.page-header h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.75rem;color:var(--dark)}
+.page-header p{color:var(--gray);font-size:.875rem;margin-top:3px}
+/* FILTERS */
+.filters-bar{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:9px 14px;flex:1;max-width:320px;transition:border-color .2s}
+.search-wrap:focus-within{border-color:var(--teal)}
+.search-wrap svg{width:16px;height:16px;color:var(--gray-light);flex-shrink:0}
+.search-wrap input{border:none;outline:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;color:var(--dark);background:transparent;width:100%}
+.search-wrap input::placeholder{color:var(--gray-light)}
+.filter-select{padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.825rem;color:var(--dark);background:var(--white);outline:none;cursor:pointer;transition:border-color .2s}
+.filter-select:focus{border-color:var(--teal)}
+.filter-btn-active{padding:9px 16px;background:var(--teal-soft);border:1.5px solid rgba(45,212,191,.3);border-radius:10px;color:var(--teal-dark);font-size:.825rem;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.filter-btn-active.inactive{background:#fef2f2;border-color:#fecaca;color:var(--red)}
+.results-count{color:var(--gray-light);font-size:.825rem;margin-left:auto}
+/* TABLE */
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.table{width:100%;border-collapse:collapse}
+.table th{text-align:left;font-size:.72rem;font-weight:700;color:var(--gray-light);text-transform:uppercase;letter-spacing:.06em;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--bg)}
+.table td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:.855rem;color:var(--dark2);vertical-align:middle}
+.table tr:last-child td{border-bottom:none}
+.table tr:hover td{background:var(--bg)}
+.user-cell{display:flex;align-items:center;gap:10px}
+.user-avatar-md{width:34px;height:34px;border-radius:10px;background:var(--teal);color:#fff;font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;flex-shrink:0}
+.user-full-name{font-weight:600;font-size:.875rem;color:var(--dark)}
+.user-email-sm{font-size:.75rem;color:var(--gray-light)}
+.role-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:20px}
+.role-badge.STUDENT{background:var(--teal-soft);color:var(--teal-dark)}
+.role-badge.ADMIN{background:#fef3c7;color:#d97706}
+.status-toggle{display:flex;align-items:center;gap:6px;cursor:pointer}
+.toggle-pill{width:36px;height:20px;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-pill.on{background:var(--green)}
+.toggle-pill.off{background:var(--gray-light)}
+.toggle-knob{position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:3px;transition:left .2s}
+.toggle-pill.on .toggle-knob{left:19px}
+.toggle-pill.off .toggle-knob{left:3px}
+.status-label{font-size:.8rem;font-weight:600}
+.status-label.on{color:var(--green)}
+.status-label.off{color:var(--gray-light)}
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-top:1px solid var(--border)}
+.pg-info{font-size:.825rem;color:var(--gray-light)}
+.pg-btns{display:flex;gap:6px}
+.pg-btn{width:34px;height:34px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);color:var(--gray);font-size:.825rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
+.pg-btn:hover:not(:disabled){border-color:var(--teal);color:var(--teal-dark)}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed}
+.pg-btn.current{background:var(--teal);color:#fff;border-color:var(--teal)}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:12px 20px;border-radius:12px;font-size:.875rem;font-weight:600;transform:translateY(80px);transition:transform .3s;z-index:999}
+.toast.show{transform:translateY(0)}
+.toast.success{background:#16a34a}
+.toast.error{background:var(--red)}
+
+@media (max-width:900px){
+  body{display:block}
+  .sidebar{position:relative;width:100%;height:auto;padding:16px 0;border-right:none;border-bottom:1px solid var(--border)}
+  .sidebar-logo{margin-bottom:10px}
+  .sidebar-nav{display:flex;gap:8px;overflow-x:auto;padding:0 12px 8px}
+  .nav-item{white-space:nowrap;margin-bottom:0;flex-shrink:0}
+  .sidebar-bottom{display:none}
+  .main{margin-left:0;padding:20px 16px}
+  .results-count{margin-left:0}
+}
+
+@media (max-width:640px){
+  .search-wrap{max-width:none;width:100%}
+  .table{display:block;overflow-x:auto;white-space:nowrap}
+  .pagination{flex-direction:column;align-items:flex-start;gap:10px}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+    TutorAI <span class="admin-badge">ADMIN</span>
+  </a>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="index.html"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
+    <a class="nav-item active" href="users.html"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Users</a>
+    <a class="nav-item" href="analytics.html"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</a>
+    <a class="nav-item" href="../dashboard.html?admin_view=1" onclick="localStorage.setItem('admin_view_mode','1')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>Student View</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="admin-info"><div class="admin-avatar">A</div><div><div class="admin-name">Admin</div><div class="admin-role">Administrator</div></div></div>
+    <button class="logout-btn" onclick="logout()"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Log Out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>User Management</h1>
+    <p>Manage all registered students and admins.</p>
+  </div>
+
+  <div class="filters-bar">
+    <div class="search-wrap">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Search by name or email..." oninput="debounceSearch()"/>
+    </div>
+    <select class="filter-select" id="roleFilter" onchange="loadUsers(true)">
+      <option value="">All Roles</option>
+      <option value="STUDENT">Student</option>
+      <option value="ADMIN">Admin</option>
+    </select>
+    <select class="filter-select" id="statusFilter" onchange="loadUsers(true)">
+      <option value="">All Status</option>
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+    <span class="results-count" id="resultsCount"></span>
+  </div>
+
+  <div class="table-card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="usersTableBody">
+        <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--gray-light)">Loading users...</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination" id="paginationBar" style="display:none">
+      <span class="pg-info" id="pgInfo"></span>
+      <div class="pg-btns" id="pgBtns"></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'http://localhost:8000/api';
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '../index.html';
+const headers = { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' };
+
+const LIMIT = 15;
+let currentPage = 0;
+let totalUsers = 0;
+let searchTimer = null;
+
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadUsers(true), 350);
+}
+
+async function loadUsers(reset=false) {
+  if (reset) currentPage = 0;
+  const search   = document.getElementById('searchInput').value.trim();
+  const role     = document.getElementById('roleFilter').value;
+  const isActive = document.getElementById('statusFilter').value;
+  const offset   = currentPage * LIMIT;
+
+  const params = new URLSearchParams({ limit:LIMIT, offset });
+  if (search)   params.append('search', search);
+  if (role)     params.append('role', role);
+  if (isActive) params.append('is_active', isActive);
+
+  const tbody = document.getElementById('usersTableBody');
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--gray-light)">Loading...</td></tr>`;
+
+  try {
+    const res = await fetch(`${API}/admin/users?${params}`, { headers });
+    if (res.status===401){localStorage.clear();window.location.href='../index.html';return;}
+    if (res.status===403){alert('Admin access required.');window.location.href='../dashboard.html';return;}
+    const data = await res.json();
+    const users = data.users || [];
+    totalUsers = data.total || users.length;
+
+    document.getElementById('resultsCount').textContent = `${totalUsers} user${totalUsers!==1?'s':''}`;
+
+    if (!users.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--gray-light)">No users found.</td></tr>`;
+      document.getElementById('paginationBar').style.display = 'none';
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => {
+      const initials = ((u.first_name||'')[0]+(u.last_name||'')[0]).toUpperCase();
+      const joined = new Date(u.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      return `<tr>
+        <td>
+          <div class="user-cell">
+            <div class="user-avatar-md">${initials}</div>
+            <div>
+              <div class="user-full-name">${u.first_name} ${u.last_name}</div>
+              <div class="user-email-sm">${u.email}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="role-badge ${u.role}">${u.role}</span></td>
+        <td>
+          <div class="status-toggle" onclick="toggleStatus('${u.id}', ${u.is_active})">
+            <div class="toggle-pill ${u.is_active?'on':'off'}"><div class="toggle-knob"></div></div>
+            <span class="status-label ${u.is_active?'on':'off'}">${u.is_active?'Active':'Inactive'}</span>
+          </div>
+        </td>
+        <td style="color:var(--gray-light)">${joined}</td>
+        <td>
+          <button onclick="toggleStatus('${u.id}',${u.is_active})" style="background:${u.is_active?'#fef2f2':'#f0fdf4'};color:${u.is_active?'var(--red)':'var(--green)'};border:1.5px solid ${u.is_active?'#fecaca':'#bbf7d0'};padding:5px 12px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s">
+            ${u.is_active ? 'Deactivate' : 'Activate'}
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    renderPagination();
+    document.getElementById('paginationBar').style.display = 'flex';
+  } catch {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--red)">Failed to load users.</td></tr>`;
+  }
+}
+
+async function toggleStatus(userId, currentlyActive) {
+  try {
+    const res = await fetch(`${API}/admin/users/${userId}`, {
+      method:'PATCH', headers,
+      body: JSON.stringify({ is_active: !currentlyActive })
+    });
+    if (!res.ok) { showToast('Failed to update user.','error'); return; }
+    showToast(`User ${currentlyActive?'deactivated':'activated'} successfully.`, 'success');
+    loadUsers();
+  } catch { showToast('Network error.','error'); }
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(totalUsers / LIMIT);
+  if (totalPages <= 1) { document.getElementById('paginationBar').style.display='none'; return; }
+  const start = currentPage * LIMIT + 1;
+  const end = Math.min(start + LIMIT - 1, totalUsers);
+  document.getElementById('pgInfo').textContent = `Showing ${start}–${end} of ${totalUsers}`;
+  const btns = document.getElementById('pgBtns');
+  btns.innerHTML = `
+    <button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===0?'disabled':''}>‹</button>
+    ${Array.from({length:Math.min(totalPages,5)},(_,i)=>`<button class="pg-btn ${i===currentPage?'current':''}" onclick="goPage(${i})">${i+1}</button>`).join('')}
+    <button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages-1?'disabled':''}>›</button>`;
+}
+
+function goPage(p) { currentPage = p; loadUsers(); }
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+function logout() {
+  fetch(`${API}/auth/logout`,{method:'POST',headers}).finally(()=>{localStorage.clear();window.location.href='../index.html';});
+}
+
+loadUsers();
+</script>
+</body>
+</html>

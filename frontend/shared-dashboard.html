@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Dashboard - BI Dashboard Generator</title>
+
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="assets/css/tailwind.build.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+
+    <!-- GridStack (static mode) — renders saved positions exactly like the editor -->
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard-themes.css">
+    <style>
+        .grid-stack-item-content { inset: 4px; }
+        .grid-stack-item-content .chart-card { height: 100%; }
+    </style>
+    <!-- Teal reference-style reskin (recolors indigo/blue -> teal, Nunito/Plus Jakarta Sans fonts) -->
+    <link rel="stylesheet" href="css/teal-theme.css">
+</head>
+<body class="font-['Inter'] bg-gray-50">
+
+    <!-- Minimal public header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <span class="font-bold text-gray-800 text-lg">BI Dashboard Generator</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-semibold px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">
+                    View Only
+                </span>
+                <a href="index.html" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    Sign in to create dashboards
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-6 py-10">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Loading state -->
+            <div id="loadingState" class="text-center py-24">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                <p class="text-gray-500">Loading shared dashboard…</p>
+            </div>
+
+            <!-- Error state -->
+            <div id="errorState" class="hidden text-center py-24">
+                <svg class="w-20 h-20 mx-auto mb-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+                <p id="errorTitle" class="text-xl font-semibold text-gray-700 mb-2">Dashboard not available</p>
+                <p id="errorMessage" class="text-gray-500 mb-6"></p>
+                <a href="index.html" class="btn btn-primary inline-flex items-center">Go to homepage</a>
+            </div>
+
+            <!-- Dashboard content (hidden until loaded) -->
+            <div id="dashboardContent" class="hidden">
+                <!-- Header -->
+                <div id="dashboardBanner" class="mb-8">
+                    <h1 id="dashboardTitle" class="text-4xl font-bold text-gray-800 mb-2"></h1>
+                    <p id="dashboardDescription" class="text-gray-500 text-lg mb-4"></p>
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+                        <span id="chartCountBadge" class="flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                            </svg>
+                            <span id="chartCount"></span>
+                        </span>
+                        <span id="viewCountBadge" class="flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <span id="viewCount"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Page tabs (read-only) -->
+                <div id="pageTabBar" class="dash-tabbar hidden"></div>
+
+                <!-- Charts grid -->
+                <div id="dashboardGrid" class="dashboard-grid"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center text-gray-500 text-sm">
+            <p>Shared via <a href="index.html" class="text-blue-600 hover:underline font-medium">BI Dashboard Generator</a> &mdash; Sign in to build your own dashboards.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript (no auth.js / navbar.js needed) -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/components/notifications.js"></script>
+    <script src="js/visualization/chart-renderer.js"></script>
+    <script src="js/visualization/dashboard-layout.js"></script>
+
+    <script src="js/pages/shared-dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { initSharedDashboard(); });
+    </script>
+    <script>
+    (function () {
+        function renderIcons() { if (window.lucide) { try { lucide.createIcons(); } catch (_) {} } }
+        let t = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            renderIcons();
+            new MutationObserver(() => { clearTimeout(t); t = setTimeout(renderIcons, 80); })
+                .observe(document.body, { childList: true, subtree: true });
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+# FastAPI and Server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+
+# Authentication & Security
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-jose[cryptography]==3.3.0
+pydantic[email]==2.5.0
+pydantic-settings==2.1.0
+
+# Data Processing
+pandas>=3.0,<4         # pipeline is written for pandas 3.x string-dtype semantics
+numpy>=2.0.0           # sentence-transformers 3+ requires numpy 2.x
+pyarrow>=15.0.0        # Parquet storage for processed datasets (typed, ~10x faster reads)
+openpyxl>=3.1.5,<3.2   # pandas 3.x requires >=3.1.5 to read .xlsx (TI-02)
+
+# Visualization
+plotly==5.18.0
+
+# Development
+python-dotenv==1.0.0
+
+# HTTP client (OpenRouter LLM integration)
+# NOTE: httpx must stay <0.28 — FastAPI 0.104.1 / Starlette 0.27.0 TestClient
+# passes app= to httpx, which httpx>=0.28 removed (breaks the test suite).
+httpx>=0.27,<0.28
+
+# Testing
+pytest==9.1.1
+
+# Phase 3 — Export
+kaleido==0.2.1
+reportlab==4.2.2
+
+# Phase 3 — External Data Connectors
+pymysql==1.1.1
+psycopg2-binary==2.9.9
+
+# Phase 3 — Scheduled Email Reports
+APScheduler==3.10.4
+resend==2.32.2        # primary email provider (simpler than SendGrid)
+sendgrid==6.11.0      # fallback / alternative
+
+# Phase 2 — NLP & Analytics
+# sentence-transformers pulls PyTorch (~500 MB CPU build).
+# Validate first: pip install sentence-transformers torch --index-url https://download.pytorch.org/whl/cpu
+# The NLP engine gracefully falls back to keyword-only mode if not installed.
+sentence-transformers>=5.0.0
+# After: python -m spacy download en_core_web_sm
+spacy>=3.7.4
+scikit-learn>=1.4.0
+scipy>=1.12.0

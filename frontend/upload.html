@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Dataset - BI Dashboard Generator</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="assets/css/tailwind.build.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/tooltips.css">
+    <link rel="stylesheet" href="css/empty-states.css">
+    <link rel="stylesheet" href="css/form-validation.css">
+    <!-- Teal reference-style reskin (recolors indigo/blue -> teal, Nunito/Plus Jakarta Sans fonts) -->
+    <link rel="stylesheet" href="css/teal-theme.css">
+</head>
+<body class="font-['Inter'] bg-gray-50">
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="pt-8 pb-16">
+        <!-- Hero Header — light, teal-accented (matches index.html; no dark banner) -->
+        <div class="bg-white border-b border-gray-100 py-16 px-6 mb-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:var(--primary-50);">
+                        <svg class="w-7 h-7" fill="none" stroke="var(--primary-600)" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </span>
+                    <div>
+                        <h1 class="text-4xl font-extrabold tracking-tight text-gray-800">Upload Your Data</h1>
+                        <p class="text-gray-500 text-lg mt-2">
+                            Transform your CSV or Excel files into powerful insights
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-4 mt-6">
+                    <div class="flex items-center gap-2 px-4 py-2 rounded-lg border" style="background:var(--primary-50); border-color:var(--primary-100);">
+                        <svg class="w-5 h-5" fill="none" stroke="var(--primary-600)" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">CSV & XLSX Support</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 rounded-lg border" style="background:var(--primary-50); border-color:var(--primary-100);">
+                        <svg class="w-5 h-5" fill="none" stroke="var(--primary-600)" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Instant Processing</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 rounded-lg border" style="background:var(--primary-50); border-color:var(--primary-100);">
+                        <svg class="w-5 h-5" fill="none" stroke="var(--primary-600)" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700">Secure & Private</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6">
+            <div class="max-w-4xl mx-auto">
+                <!-- Upload Card -->
+                <div class="card bg-white shadow-xl border border-gray-100">
+
+                    <!-- Tab switcher -->
+                    <div class="flex border-b border-gray-200 mb-6">
+                        <button id="tabUpload" data-tab="upload"
+                            class="tab-btn flex items-center gap-2 px-5 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 transition-colors"
+                            aria-selected="true">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            Upload File
+                        </button>
+                        <button id="tabConnect" data-tab="connect"
+                            class="tab-btn flex items-center gap-2 px-5 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-colors"
+                            aria-selected="false">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            Connect Data Source
+                        </button>
+                    </div>
+
+                    <!-- ── Upload Tab Panel ─────────────────────────────── -->
+                    <div id="uploadTabPanel">
+                    <!-- Drag & Drop Zone -->
+                    <div id="dropZone" class="border-3 border-dashed border-gray-300 rounded-2xl p-16 text-center hover:border-blue-500 transition-all duration-300 cursor-pointer bg-gradient-to-br from-gray-50 to-blue-50/30 hover:from-blue-50 hover:to-indigo-50/50 group">
+                        <div id="dropZoneContent">
+                            <!-- Icon with animation -->
+                            <div class="flex justify-center mb-6">
+                                <div class="relative">
+                                    <svg class="w-20 h-20 text-blue-500 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-700 transition-colors">
+                                Drop your file here
+                            </h3>
+                            <p class="text-gray-600 mb-2 text-lg">
+                                or <span class="text-blue-600 font-semibold group-hover:text-blue-700">click to browse</span>
+                            </p>
+                            <p class="text-sm text-gray-500 mt-4">
+                                <span class="inline-flex items-center gap-1 bg-white px-3 py-1 rounded-full border border-gray-200">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    CSV, XLSX • Max 50MB
+                                </span>
+                            </p>
+                        </div>
+                        
+                        <!-- Hidden File Input -->
+                        <input 
+                            type="file" 
+                            id="fileInput" 
+                            accept=".csv,.xlsx" 
+                            class="hidden"
+                        >
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" class="mt-6 hidden">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-blue-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="animate-spin">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-800" id="uploadFileName">Uploading...</span>
+                                </div>
+                                <span class="text-sm font-bold text-blue-600" id="uploadPercentage">0%</span>
+                            </div>
+                            <div id="progressBarContainer"></div>
+                        </div>
+                    </div>
+
+                    <!-- File Info (After Selection) -->
+                    <div id="fileInfo" class="mt-6 hidden">
+                        <div class="bg-slate-50 border-2 border-blue-200 rounded-xl p-5 shadow-sm">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-start gap-4 flex-1">
+                                    <div class="bg-blue-600 p-3 rounded-lg">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-gray-800 text-lg" id="selectedFileName">file.csv</p>
+                                        <p class="text-sm text-gray-600 mt-1" id="selectedFileSize">0 MB</p>
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <span class="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                Ready to upload
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button id="removeFileBtn" class="text-gray-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button id="uploadBtn" class="w-full mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform transition-all duration-200 text-lg">
+                            <span class="flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                Upload Dataset
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorMessage" class="mt-6 hidden">
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="text-red-800 font-semibold mb-1">Upload Failed</h3>
+                                    <p class="text-red-700 text-sm" id="errorText">Error message</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="successMessage" class="mt-6 hidden">
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="text-green-800 font-semibold mb-1">Success!</h3>
+                                    <p class="text-green-700 text-sm" id="successText">Success message</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div><!-- /uploadTabPanel -->
+
+                    <!-- ── Connect Tab Panel ───────────────────────────── -->
+                    <div id="connectTabPanel" class="hidden">
+
+                        <!-- Source type buttons -->
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button data-source="google_sheets"
+                                class="source-btn flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-green-500 bg-green-50 text-green-700 text-sm font-semibold transition-all">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                                </svg>
+                                Google Sheets
+                            </button>
+                            <!-- CH-11: DB connectors hidden from the UI for now — backend
+                                 /datasets/connect + /connect/tables remain fully functional.
+                                 Remove the 'hidden' class to re-enable. -->
+                            <button data-source="mysql"
+                                class="hidden source-btn flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-blue-400 hover:text-blue-600 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                                </svg>
+                                MySQL
+                            </button>
+                            <button data-source="postgres"
+                                class="hidden source-btn flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-blue-400 hover:text-blue-600 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                                </svg>
+                                PostgreSQL
+                            </button>
+                        </div>
+
+                        <!-- Google Sheets form -->
+                        <div id="sheetsPanel">
+                            <p class="text-sm text-gray-500 mb-5 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
+                                The sheet must be shared as <strong>Anyone with the link → Viewer</strong>.
+                                Open the sheet → Share → change General Access to "Anyone with the link".
+                            </p>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Sheet URL <span class="text-red-500">*</span></label>
+                                    <input type="url" id="sheetsUrl"
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                        placeholder="https://docs.google.com/spreadsheets/d/...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Dataset Name <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <input type="text" id="sheetsName"
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                        placeholder="My Google Sheet">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Keep data up to date</label>
+                                    <!-- CH-10: live push is the headline; interval polling is the fallback -->
+                                    <div class="space-y-2">
+                                        <label class="flex items-start gap-3 border border-teal-300 bg-teal-50 rounded-xl px-4 py-3 cursor-pointer">
+                                            <input type="radio" name="sheetsRefreshMode" value="live" checked class="mt-1">
+                                            <span>
+                                                <span class="block text-sm font-semibold text-teal-800">⚡ Live (recommended)</span>
+                                                <span class="block text-xs text-teal-700 mt-0.5">
+                                                    Updates within seconds of a sheet edit. One-time Apps Script setup shown
+                                                    after import — an hourly safety check is included automatically.
+                                                </span>
+                                            </span>
+                                        </label>
+                                        <label class="flex items-start gap-3 border border-gray-200 rounded-xl px-4 py-3 cursor-pointer">
+                                            <input type="radio" name="sheetsRefreshMode" value="scheduled" class="mt-1">
+                                            <span class="flex-1">
+                                                <span class="block text-sm font-semibold text-gray-700">🕐 Scheduled only</span>
+                                                <span class="block text-xs text-gray-500 mt-0.5">Re-fetch on a fixed interval (no live push).</span>
+                                                <select id="sheetsRefresh"
+                                                    class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white hidden">
+                                                    <option value="">One-time import (no auto-refresh)</option>
+                                                    <option value="5">Re-fetch every 5 minutes</option>
+                                                    <option value="15" selected>Re-fetch every 15 minutes</option>
+                                                    <option value="60">Re-fetch every hour</option>
+                                                    <option value="360">Re-fetch every 6 hours</option>
+                                                    <option value="1440">Re-fetch daily</option>
+                                                </select>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1">
+                                        When the sheet changes, this dataset re-fetches and re-cleans (using your approved
+                                        cleaning decisions) — dashboards and scheduled reports always use the latest data.
+                                    </p>
+                                </div>
+                                <button id="importSheetsBtn"
+                                    class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform transition-all duration-200 text-base">
+                                    <span class="flex items-center justify-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                        </svg>
+                                        Import Sheet
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Database form (MySQL / PostgreSQL) -->
+                        <div id="dbPanel" class="hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="md:col-span-1">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Host <span class="text-red-500">*</span></label>
+                                    <input type="text" id="dbHost"
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                        placeholder="localhost">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Port <span class="text-red-500">*</span></label>
+                                    <input type="number" id="dbPort"
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                        placeholder="3306" value="3306">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Username <span class="text-red-500">*</span></label>
+                                    <input type="text" id="dbUsername"
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                        placeholder="root">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                                    <input type="password" id="dbPassword"
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                        placeholder="••••••••">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Database <span class="text-red-500">*</span></label>
+                                    <input type="text" id="dbDatabase"
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                        placeholder="my_database">
+                                </div>
+                            </div>
+                            <button id="loadTablesBtn"
+                                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow hover:shadow-md transition-all duration-200 text-sm">
+                                Load Tables
+                            </button>
+
+                            <!-- Table picker — shown after successful "Load Tables" -->
+                            <div id="tablePickerArea" class="hidden mt-6 border-t border-gray-100 pt-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Select Table <span class="text-red-500">*</span></label>
+                                        <select id="tableSelect"
+                                            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white">
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Dataset Name <span class="text-gray-400 font-normal">(optional)</span></label>
+                                        <input type="text" id="dbDatasetName"
+                                            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow"
+                                            placeholder="e.g. Sales Orders 2024">
+                                    </div>
+                                    <button id="importTableBtn"
+                                        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform transition-all duration-200 text-base">
+                                        <span class="flex items-center justify-center gap-2">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                            </svg>
+                                            Import Table
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Connect status: progress -->
+                        <div id="connectProgress" class="mt-6 hidden">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-blue-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="animate-spin">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-800" id="connectProgressText">Connecting...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Connect status: error -->
+                        <div id="connectError" class="mt-6 hidden">
+                            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-red-800 font-semibold mb-1">Connection Failed</h3>
+                                        <p class="text-red-700 text-sm" id="connectErrorText">Error message</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Connect status: success -->
+                        <div id="connectSuccess" class="mt-6 hidden">
+                            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-green-800 font-semibold mb-1">Dataset Imported!</h3>
+                                        <p class="text-green-700 text-sm" id="connectSuccessText">Success message</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /connectTabPanel -->
+
+                </div>
+
+                <!-- Instructions Card -->
+                <div class="grid md:grid-cols-2 gap-6 mt-8">
+                    <!-- Guidelines -->
+                    <div class="card bg-white shadow-lg border border-gray-100">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800">Upload Guidelines</h2>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <div class="bg-blue-100 p-1.5 rounded-lg mt-0.5">
+                                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">File Formats</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">CSV and XLSX files supported</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="bg-blue-100 p-1.5 rounded-lg mt-0.5">
+                                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">File Size Limit</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">Maximum 50MB per file</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="bg-blue-100 p-1.5 rounded-lg mt-0.5">
+                                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Column Headers</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">First row should contain headers</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="card bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 shadow-lg">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 p-3 rounded-xl">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800">What Happens on Upload</h2>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <div class="bg-indigo-100 p-1.5 rounded-lg mt-0.5 flex-shrink-0">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Type Detection</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">Every column is classified as numeric, categorical, datetime, or boolean</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="bg-indigo-100 p-1.5 rounded-lg mt-0.5 flex-shrink-0">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Missing Value Handling</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">Numeric → median fill &nbsp;·&nbsp; Categorical → mode fill &nbsp;·&nbsp; Datetime → forward fill</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="bg-indigo-100 p-1.5 rounded-lg mt-0.5 flex-shrink-0">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Duplicate Removal</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">Exact-match duplicate rows are detected and removed, keeping the first occurrence</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="bg-indigo-100 p-1.5 rounded-lg mt-0.5 flex-shrink-0">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Categorical Normalisation</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">Case standardisation, whitespace trimming, and fuzzy typo correction on text columns</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="bg-indigo-100 p-1.5 rounded-lg mt-0.5 flex-shrink-0">
+                                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Full Audit Trail</p>
+                                    <p class="text-sm text-gray-600 mt-0.5">Every change is recorded — view the detailed cleaning report from your Datasets page</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Data Processing Pipeline -->
+                <div class="mt-8 card bg-white border border-gray-100 shadow-lg">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="bg-gradient-to-br from-teal-500 to-cyan-600 p-3 rounded-xl">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">Data Processing Pipeline</h2>
+                            <p class="text-sm text-gray-500">Automatically applied to every dataset you upload</p>
+                        </div>
+                    </div>
+
+                    <!-- Pipeline steps -->
+                    <div class="mt-6 grid md:grid-cols-5 gap-0">
+
+                        <!-- Step connector line (desktop only) -->
+                        <div class="hidden md:block col-span-5 relative mb-4">
+                            <div class="absolute inset-y-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-teal-200"></div>
+                        </div>
+
+                        <!-- Step 1 -->
+                        <div class="flex flex-col items-center text-center px-2 mb-6 md:mb-0">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 border-2 border-blue-400 flex items-center justify-center mb-3 relative z-10">
+                                <span class="text-blue-700 font-bold text-sm">1</span>
+                            </div>
+                            <p class="font-semibold text-gray-800 text-sm">File Ingestion</p>
+                            <p class="text-xs text-gray-500 mt-1">Parse CSV / XLSX, validate structure, check encoding</p>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="flex flex-col items-center text-center px-2 mb-6 md:mb-0">
+                            <div class="w-12 h-12 rounded-full bg-indigo-100 border-2 border-indigo-400 flex items-center justify-center mb-3 relative z-10">
+                                <span class="text-indigo-700 font-bold text-sm">2</span>
+                            </div>
+                            <p class="font-semibold text-gray-800 text-sm">Type Detection</p>
+                            <p class="text-xs text-gray-500 mt-1">Classify each column: numeric, categorical, datetime, boolean</p>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="flex flex-col items-center text-center px-2 mb-6 md:mb-0">
+                            <div class="w-12 h-12 rounded-full bg-yellow-100 border-2 border-yellow-400 flex items-center justify-center mb-3 relative z-10">
+                                <span class="text-yellow-700 font-bold text-sm">3</span>
+                            </div>
+                            <p class="font-semibold text-gray-800 text-sm">Quality Analysis</p>
+                            <p class="text-xs text-gray-500 mt-1">Detect missing values, duplicates, and statistical outliers</p>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="flex flex-col items-center text-center px-2 mb-6 md:mb-0">
+                            <div class="w-12 h-12 rounded-full bg-orange-100 border-2 border-orange-400 flex items-center justify-center mb-3 relative z-10">
+                                <span class="text-orange-700 font-bold text-sm">4</span>
+                            </div>
+                            <p class="font-semibold text-gray-800 text-sm">Cleaning</p>
+                            <p class="text-xs text-gray-500 mt-1">Impute missing values, remove duplicates, normalise categories</p>
+                        </div>
+
+                        <!-- Step 5 -->
+                        <div class="flex flex-col items-center text-center px-2">
+                            <div class="w-12 h-12 rounded-full bg-teal-100 border-2 border-teal-400 flex items-center justify-center mb-3 relative z-10">
+                                <span class="text-teal-700 font-bold text-sm">5</span>
+                            </div>
+                            <p class="font-semibold text-gray-800 text-sm">Ready to Analyse</p>
+                            <p class="text-xs text-gray-500 mt-1">Cleaned file saved; audit report generated for your review</p>
+                        </div>
+                    </div>
+
+                    <!-- Detail table -->
+                    <div class="mt-8 border border-gray-100 rounded-xl overflow-hidden">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="text-left px-4 py-3 font-semibold text-gray-600 w-1/4">Operation</th>
+                                    <th class="text-left px-4 py-3 font-semibold text-gray-600 w-1/3">What it does</th>
+                                    <th class="text-left px-4 py-3 font-semibold text-gray-600">Strategy / Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-800">Column Type Detection</td>
+                                    <td class="px-4 py-3 text-gray-600">Infers the data type of every column automatically</td>
+                                    <td class="px-4 py-3 text-gray-500">Numeric, Categorical, Datetime, Boolean — heuristic + pandas dtype analysis</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-800">Missing Value Imputation</td>
+                                    <td class="px-4 py-3 text-gray-600">Fills empty / NaN cells rather than discarding rows</td>
+                                    <td class="px-4 py-3 text-gray-500">Numeric → median &nbsp;·&nbsp; Categorical → mode (most frequent) &nbsp;·&nbsp; Datetime → forward fill &nbsp;·&nbsp; Columns &gt;50% empty are dropped</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-800">Duplicate Row Removal</td>
+                                    <td class="px-4 py-3 text-gray-600">Identifies and removes exact-match duplicate rows</td>
+                                    <td class="px-4 py-3 text-gray-500">All columns compared; first occurrence kept</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-800">Category Normalisation</td>
+                                    <td class="px-4 py-3 text-gray-600">Standardises text values in categorical columns</td>
+                                    <td class="px-4 py-3 text-gray-500">Strips whitespace &nbsp;·&nbsp; Title-cases values &nbsp;·&nbsp; Fuzzy-matches near-duplicates (≥ 80% similarity) to correct typos</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-800">Outlier Detection</td>
+                                    <td class="px-4 py-3 text-gray-600">Flags statistically unusual values in numeric columns</td>
+                                    <td class="px-4 py-3 text-gray-500">IQR (Inter-Quartile Range) method; outliers are flagged in the report but not removed</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 font-medium text-gray-800">Audit Report</td>
+                                    <td class="px-4 py-3 text-gray-600">Records every transformation applied to your file</td>
+                                    <td class="px-4 py-3 text-gray-500">Accessible from Datasets page → Report button; shows before/after row counts and per-column action log</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p class="text-xs text-gray-400 mt-4">
+                        Your original file is always preserved unchanged. The cleaned version is used only for analysis and queries.
+                    </p>
+                </div>
+
+                <!-- Recent Uploads -->
+                <div class="mt-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Recent Uploads</h2>
+                        <a href="datasets.html" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold group transition-colors">
+                            View All Datasets
+                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    </div>
+                    <div id="recentUploads" class="space-y-4">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils/validation.js"></script>
+    <script src="js/components/skeleton-loader.js"></script>
+    <script src="js/components/tooltip.js"></script>
+    <script src="js/components/empty-states.js"></script>
+    <script src="js/components/notifications.js"></script>
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/loading.js"></script>
+    <script src="js/pages/upload.js"></script>
+    
+    <script>
+        // Require authentication
+        Auth.requireAuth();
+        
+        // Initialize navbar
+        Navbar.init('upload');
+    </script>
+    <script>
+    (function () {
+        function renderIcons() { if (window.lucide) { try { lucide.createIcons(); } catch (_) {} } }
+        let t = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            renderIcons();
+            new MutationObserver(() => { clearTimeout(t); t = setTimeout(renderIcons, 80); })
+                .observe(document.body, { childList: true, subtree: true });
+        });
+    })();
+    </script>
+</body>
+</html>

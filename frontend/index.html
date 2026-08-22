@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BI Dashboard — Upload messy data. Get live dashboards.</title>
+<meta name="description" content="Upload spreadsheets, approve automatic cleaning, ask questions in plain English, and build live-updating dashboards — no code, no analysts required.">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#2dd4bf;
+  --teal-dark:#14b8a6;
+  --teal-light:#ccfbf1;
+  --teal-soft:#e6faf8;
+  --dark:#1a2332;
+  --dark2:#2d3748;
+  --gray:#64748b;
+  --gray-light:#94a3b8;
+  --bg:#f0fafa;
+  --white:#ffffff;
+  --card-bg:#ffffff;
+  --border:#e2e8f0;
+  --shadow:0 4px 24px rgba(45,212,191,0.08);
+  --shadow-lg:0 8px 40px rgba(45,212,191,0.15);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--dark);line-height:1.6;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(240,250,250,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;font-size:1.2rem;color:var(--dark);text-decoration:none}
+.nav-logo svg{color:var(--teal)}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-links a{color:var(--gray);font-size:0.9rem;font-weight:500;text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--dark)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.btn-login{color:var(--teal-dark);font-weight:700;font-size:0.9rem;background:none;border:none;cursor:pointer;padding:8px 16px;border-radius:8px;transition:background .2s;font-family:'Plus Jakarta Sans',sans-serif}
+.btn-login:hover{background:var(--teal-soft)}
+.btn-register{background:var(--teal);color:white;font-weight:700;font-size:0.9rem;border:none;cursor:pointer;padding:10px 20px;border-radius:10px;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;display:inline-flex;align-items:center}
+.btn-register:hover{background:var(--teal-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(45,212,191,0.35)}
+
+/* HERO */
+.hero{min-height:100vh;padding:100px 5% 60px;display:flex;align-items:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(45,212,191,0.12) 0%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:400px;height:400px;background:radial-gradient(circle,rgba(45,212,191,0.06) 0%,transparent 70%);pointer-events:none}
+.hero-content{flex:1;max-width:580px;animation:fadeUp .7s ease both}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teal-soft);border:1px solid rgba(45,212,191,0.3);color:var(--teal-dark);font-size:0.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:20px;margin-bottom:24px}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--teal)}
+.hero h1{font-family:'Nunito',sans-serif;font-size:clamp(2.4rem,5vw,3.6rem);font-weight:900;line-height:1.15;margin-bottom:20px;color:var(--dark)}
+.hero h1 span{color:var(--teal)}
+.hero p{color:var(--gray);font-size:1.05rem;line-height:1.7;margin-bottom:36px;max-width:480px}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:white;font-weight:700;font-size:0.95rem;border:none;cursor:pointer;padding:14px 28px;border-radius:12px;transition:all .25s;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none}
+.btn-primary:hover{background:var(--teal-dark);transform:translateY(-2px);box-shadow:0 8px 28px rgba(45,212,191,0.4)}
+.btn-primary:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:var(--white);color:var(--dark);font-weight:700;font-size:0.95rem;border:2px solid var(--border);cursor:pointer;padding:12px 24px;border-radius:12px;transition:all .25s;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none}
+.btn-secondary:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-2px)}
+.hero-trust{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin-top:32px;font-size:.8rem;color:var(--gray-light)}
+.hero-trust span{display:inline-flex;align-items:center;gap:6px}
+.hero-trust svg{width:14px;height:14px;color:var(--teal)}
+.hero-visual{flex:1;display:flex;justify-content:flex-end;align-items:center;position:relative;animation:fadeIn .9s ease both .2s;opacity:0}
+.hero-img-wrap{position:relative;width:380px;height:400px}
+.ai-card{position:absolute;top:0;right:20px;width:150px;height:150px;background:linear-gradient(135deg,rgba(45,212,191,0.15),rgba(45,212,191,0.05));border:1px solid rgba(45,212,191,0.2);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;backdrop-filter:blur(8px);animation:float 4s ease-in-out infinite;z-index:2}
+.ai-card svg{width:52px;height:52px;color:var(--teal);opacity:.9}
+.ai-card-label{font-size:.7rem;color:var(--teal-dark);font-weight:700}
+.dash-card{position:absolute;bottom:0;right:0;width:270px;background:white;border-radius:20px;box-shadow:var(--shadow-lg);padding:18px;border:1px solid var(--border)}
+.dash-card-top{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.dash-dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.dash-live{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:.65rem;font-weight:700;color:var(--teal-dark);background:var(--teal-soft);border:1px solid rgba(45,212,191,.3);border-radius:20px;padding:2px 8px}
+.dash-live::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--teal);animation:pulse2 1.6s infinite}
+.dash-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.dash-kpi{background:var(--bg);border-radius:10px;padding:9px 11px}
+.dash-kpi p:first-child{font-size:.62rem;color:var(--gray-light);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.dash-kpi p:last-child{font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;color:var(--dark);margin-top:2px}
+.dash-chart{display:flex;align-items:flex-end;gap:5px;height:56px;background:var(--bg);border-radius:10px;padding:8px 10px}
+.dash-bar{flex:1;background:linear-gradient(180deg,var(--teal),var(--teal-dark));border-radius:3px 3px 0 0}
+
+/* SECTION HEADERS */
+.section-header{text-align:center;margin-bottom:56px}
+.section-header h2{font-family:'Nunito',sans-serif;font-size:clamp(2rem,3.5vw,2.8rem);font-weight:900;color:var(--dark);margin-bottom:12px}
+.section-header h2 span{color:var(--teal)}
+.section-header p{color:var(--gray);font-size:1rem;max-width:560px;margin:0 auto}
+
+/* FEATURES */
+.features{padding:90px 5%;background:var(--white)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:0 auto}
+.feature-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:32px 24px;transition:all .3s}
+.feature-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:rgba(45,212,191,0.25)}
+.feature-icon{width:52px;height:52px;background:var(--teal-soft);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.feature-icon svg{width:26px;height:26px;color:var(--teal)}
+.feature-card h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:1.05rem;color:var(--dark);margin-bottom:10px}
+.feature-card p{color:var(--gray);font-size:.875rem;line-height:1.65}
+
+/* HOW IT WORKS */
+.how{padding:90px 5%;background:var(--bg)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:1100px;margin:0 auto;position:relative}
+.steps::before{content:'';position:absolute;top:48px;left:12%;right:12%;height:2px;background:repeating-linear-gradient(90deg,var(--teal) 0,var(--teal) 8px,transparent 8px,transparent 18px);pointer-events:none}
+.step{text-align:center;position:relative}
+.step-icon{width:88px;height:88px;background:var(--white);border:1px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative;z-index:1;transition:all .3s}
+.step:hover .step-icon{background:var(--teal-soft);border-color:rgba(45,212,191,0.3);transform:translateY(-4px)}
+.step-icon svg{width:32px;height:32px;color:var(--teal)}
+.step-num{font-size:.75rem;font-weight:800;color:var(--teal);letter-spacing:.05em;margin-bottom:8px}
+.step h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;color:var(--dark);margin-bottom:8px}
+.step p{color:var(--gray);font-size:.85rem;line-height:1.5}
+
+/* DATA SOURCES */
+.subjects{padding:90px 5%;background:var(--white)}
+.subjects-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1100px;margin:0 auto}
+.subject-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:16px;cursor:pointer;transition:all .3s;text-decoration:none}
+.subject-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);border-color:rgba(45,212,191,0.25)}
+.subject-icon{width:64px;height:64px;background:var(--teal-soft);border-radius:16px;display:flex;align-items:center;justify-content:center}
+.subject-icon svg{width:30px;height:30px;color:var(--teal)}
+.subject-card span{font-family:'Nunito',sans-serif;font-weight:800;font-size:.9rem;color:var(--dark);text-align:center}
+
+/* QUERY DEMO */
+.chat-demo{padding:90px 5%;background:var(--bg);text-align:center}
+.chat-window{max-width:600px;margin:48px auto 0;background:white;border-radius:24px;box-shadow:var(--shadow-lg);overflow:hidden;border:1px solid var(--border)}
+.chat-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--white)}
+.chat-online-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;animation:pulse2 2s infinite}
+.chat-header-name{font-weight:700;font-size:.95rem;color:var(--dark)}
+.chat-header-status{font-size:.8rem;color:var(--gray-light)}
+.chat-messages{padding:24px;display:flex;flex-direction:column;gap:16px;max-height:340px;overflow-y:auto;background:var(--bg);text-align:left}
+.msg-user{align-self:flex-end;background:var(--white);border:1px solid var(--border);color:var(--dark);padding:12px 16px;border-radius:16px 16px 4px 16px;max-width:75%;font-size:.9rem;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.msg-ai{align-self:flex-start;background:var(--teal-soft);border:1px solid rgba(45,212,191,0.2);color:var(--dark);padding:12px 16px;border-radius:16px 16px 16px 4px;max-width:82%;font-size:.9rem;line-height:1.6}
+.msg-ai b{color:var(--teal-dark)}
+.chat-input-wrap{padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--white)}
+.chat-input{flex:1;border:none;outline:none;font-size:.9rem;color:var(--gray);font-family:'Plus Jakarta Sans',sans-serif;background:transparent}
+.chat-send{width:38px;height:38px;background:var(--teal);border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.chat-send svg{width:18px;height:18px;color:white}
+
+/* TRUST */
+.testimonials{padding:90px 5%;background:var(--white)}
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1100px;margin:0 auto}
+.testimonial-card{background:var(--card-bg);border:1px solid var(--border);border-radius:20px;padding:28px;transition:all .3s}
+.testimonial-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.testimonial-card .feature-icon{margin-bottom:18px}
+.testimonial-card h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;color:var(--dark);margin-bottom:8px}
+.testimonial-card p{color:var(--dark2);font-size:.875rem;line-height:1.7}
+
+/* GET STARTED PANEL (replaces pricing — no billing exists in this product) */
+.pricing{padding:90px 5%;background:var(--bg)}
+.pricing-card{background:var(--white);border:2px solid var(--teal);box-shadow:0 8px 40px rgba(45,212,191,0.18);border-radius:24px;padding:44px;max-width:560px;margin:0 auto;text-align:center}
+.pricing-badge{display:inline-block;background:var(--teal);color:white;font-size:.75rem;font-weight:800;padding:5px 14px;border-radius:20px;letter-spacing:.05em;margin-bottom:18px}
+.pricing-card h3{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.7rem;color:var(--dark);margin-bottom:10px}
+.pricing-card>p{color:var(--gray);font-size:.9rem;margin-bottom:24px}
+.pricing-features{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left;margin-bottom:28px}
+.pricing-features li{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--dark2)}
+.pricing-features li::before{content:'✓';color:var(--teal);font-weight:800;flex-shrink:0}
+
+/* FOOTER */
+footer{background:var(--white);border-top:1px solid var(--border);padding:32px 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;font-size:1.1rem;color:var(--dark)}
+.footer-logo svg{color:var(--teal)}
+.footer-links{display:flex;gap:2rem}
+.footer-links a{color:var(--gray);font-size:.875rem;text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--teal)}
+.footer-copy{color:var(--gray-light);font-size:.8rem}
+
+/* MODAL OVERLAY */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(15,23,42,0.5);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.modal-overlay.active{display:flex;animation:fadeIn .2s ease}
+.modal-card{background:white;border-radius:24px;padding:40px 36px;width:100%;max-width:420px;position:relative;animation:scaleIn .25s ease;box-shadow:0 24px 80px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:var(--gray-light);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:background .2s}
+.modal-close:hover{background:var(--bg);color:var(--dark)}
+.modal-card h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.6rem;color:var(--dark);margin-bottom:6px;text-align:center}
+.modal-card .modal-sub{color:var(--gray);font-size:.875rem;text-align:center;margin-bottom:28px}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-weight:600;font-size:.825rem;color:var(--dark2);margin-bottom:6px}
+.form-group input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;color:var(--dark);outline:none;transition:border-color .2s;background:var(--bg)}
+.form-group input:focus{border-color:var(--teal);background:white}
+.form-group input::placeholder{color:var(--gray-light)}
+.modal-footer-link{text-align:center;margin-top:20px;font-size:.85rem;color:var(--gray)}
+.modal-footer-link a{color:var(--teal-dark);font-weight:700;text-decoration:none;cursor:pointer}
+.modal-footer-link a:hover{text-decoration:underline}
+.alert-error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:.825rem;margin-bottom:16px;display:none}
+.alert-error.show{display:block}
+.alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;padding:10px 14px;border-radius:8px;font-size:.825rem;margin-bottom:16px;display:none}
+.alert-success.show{display:block}
+.password-wrap{position:relative}
+.password-wrap input{padding-right:46px}
+.eye-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;width:32px;height:32px;color:var(--gray-light);padding:4px;border-radius:6px}
+.eye-btn:hover{background:#f1f5f9;color:var(--dark)}
+.eye-btn svg{width:18px;height:18px}
+.pwd-hint{font-size:.78rem;color:var(--gray-light);margin-top:6px;display:block}
+.pwd-hint.ok{color:#16a34a}
+.pwd-hint.bad{color:#dc2626}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .subjects-grid{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .steps::before{display:none}
+  .testimonials-grid{grid-template-columns:1fr}
+  .hero{flex-direction:column;text-align:center;padding-top:120px}
+  .hero-visual{display:none}
+  .hero-cta,.hero-trust{justify-content:center}
+  .pricing-features{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .features-grid,.subjects-grid{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .nav-actions{gap:8px}
+  .btn-login,.btn-register{padding:8px 12px;font-size:.82rem}
+  footer{flex-direction:column;gap:12px;text-align:center}
+  .footer-links{gap:1rem;flex-wrap:wrap;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 15l4-5 3 3 5-7"/></svg>
+    BI Dashboard
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#sources">Data Sources</a>
+    <a href="#demo">Live Demo</a>
+  </div>
+  <div class="nav-actions" id="navActions">
+    <button class="btn-login" onclick="openModal('login')">Login</button>
+    <button class="btn-register" onclick="openModal('register')">Register</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Data Cleaning + AI Queries + Live Dashboards</div>
+    <h1>Upload messy data.<br>Get dashboards that <span>stay current.</span></h1>
+    <p>Drop in a CSV or connect a Google Sheet. The pipeline finds the problems, shows you every fix before applying it, answers questions in plain English — and your dashboards refresh themselves when the data changes.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="openModal('register')">Start Building Free →</button>
+      <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+    </div>
+    <div class="hero-trust">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>No code required</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Nothing changes without your approval</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>CSV, Excel &amp; Google Sheets</span>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-img-wrap">
+      <div class="ai-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+        <span class="ai-card-label">AI Engine Online</span>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-top">
+          <span class="dash-dot"></span><span class="dash-dot"></span><span class="dash-dot"></span>
+          <span class="dash-live">Live</span>
+        </div>
+        <div class="dash-kpis">
+          <div class="dash-kpi"><p>Revenue</p><p>4.28M</p></div>
+          <div class="dash-kpi"><p>Orders</p><p>12,940</p></div>
+        </div>
+        <div class="dash-chart">
+          <div class="dash-bar" style="height:34%"></div>
+          <div class="dash-bar" style="height:48%"></div>
+          <div class="dash-bar" style="height:42%"></div>
+          <div class="dash-bar" style="height:61%"></div>
+          <div class="dash-bar" style="height:55%"></div>
+          <div class="dash-bar" style="height:74%"></div>
+          <div class="dash-bar" style="height:68%"></div>
+          <div class="dash-bar" style="height:88%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-header fade-up">
+    <h2>Everything Between Raw Spreadsheet<br>and <span>Boardroom-Ready</span> Dashboard</h2>
+    <p>Powerful features designed to turn messy data into decisions, faster.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
+      <h3>Cleaning that asks first</h3>
+      <p>Currency symbols, typos, duplicates, Excel error codes — detected automatically, shown to you cell by cell, applied only after you approve.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <h3>Ask in plain English</h3>
+      <p>"Top 5 products by revenue." "Sales trend by month." The AI picks the right analysis and maps your columns — or asks for clarification instead of guessing.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+      <h3>Dashboards that stay current</h3>
+      <p>Connect a Google Sheet and edits land on your dashboard in seconds — push updates, change detection, and a visible "data as of" stamp.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></div>
+      <h3>Drag-and-drop designer</h3>
+      <p>Arrange charts, KPI cards and text blocks on a snapping grid. Multi-page tabs, color palettes, dark mode — dashboards that look designed, not generated.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v4H4zM4 12h16v8H4z"/><path d="M9 16h6"/></svg></div>
+      <h3>Reports that send themselves</h3>
+      <p>Schedule email reports — daily, weekly, monthly, your timezone. Every send re-queries the latest data and attaches fresh charts.</p>
+    </div>
+    <div class="feature-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+      <h3>Share &amp; collaborate</h3>
+      <p>Public view-only links and editor/viewer roles for teammates, plus a one-file interactive export that works offline.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how-it-works">
+  <div class="section-header fade-up">
+    <h2>How It <span>Works</span></h2>
+    <p>Four steps. No analysts required.</p>
+  </div>
+  <div class="steps">
+    <div class="step fade-up">
+      <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+      <div class="step-num">01</div>
+      <h3>Upload or connect</h3>
+      <p>CSV, Excel workbooks, or a live Google Sheet.</p>
+    </div>
+    <div class="step fade-up">
+      <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+      <div class="step-num">02</div>
+      <h3>Review the cleaning</h3>
+      <p>See every proposed fix with examples. Approve in one click or fine-tune.</p>
+    </div>
+    <div class="step fade-up">
+      <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <div class="step-num">03</div>
+      <h3>Ask questions</h3>
+      <p>Plain English in, charts with anomalies, forecasts and insights out.</p>
+    </div>
+    <div class="step fade-up">
+      <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></div>
+      <div class="step-num">04</div>
+      <h3>Build &amp; share</h3>
+      <p>Drag into dashboards, schedule reports, share live links.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATA SOURCES -->
+<section class="subjects" id="sources">
+  <div class="section-header fade-up">
+    <h2>Works With <span>Your Data</span></h2>
+    <p>Bring data in however it already lives — the cleaning engine handles the rest.</p>
+  </div>
+  <div class="subjects-grid">
+    <div class="subject-card fade-up">
+      <div class="subject-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <span>CSV &amp; Excel</span>
+    </div>
+    <div class="subject-card fade-up">
+      <div class="subject-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div>
+      <span>Live Google Sheets</span>
+    </div>
+    <div class="subject-card fade-up">
+      <div class="subject-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
+      <span>Sales &amp; Revenue</span>
+    </div>
+    <div class="subject-card fade-up">
+      <div class="subject-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <span>HR &amp; Operations</span>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="chat-demo" id="demo">
+  <div class="section-header fade-up">
+    <h2>Ask Your Data <span>Anything</span></h2>
+    <p>Natural-language questions in, ready-to-use charts out.</p>
+  </div>
+  <div class="chat-window fade-up">
+    <div class="chat-header">
+      <span class="chat-online-dot"></span>
+      <span class="chat-header-name">Query Assistant</span>
+      <span class="chat-header-status">Online</span>
+    </div>
+    <div class="chat-messages">
+      <div class="msg-user">Show revenue trend by month</div>
+      <div class="msg-ai"><b>Detected:</b> Trend Over Time · 100% confidence<br>Metric: <b>Revenue</b> · Aggregation: <b>sum</b><br>Building a line chart now…</div>
+      <div class="msg-user">Which products are top sellers?</div>
+      <div class="msg-ai"><b>Detected:</b> Top-K Items · 96% confidence<br>Ranking <b>Product</b> by <b>Revenue</b>, top 5, descending.</div>
+    </div>
+    <div class="chat-input-wrap">
+      <input class="chat-input" type="text" placeholder="Ask anything about your data..." readonly/>
+      <button class="chat-send" onclick="openModal('register')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="testimonials">
+  <div class="section-header fade-up">
+    <h2>Built on <span>Trust</span>, Not Guesswork</h2>
+    <p>Financial data deserves a pipeline that shows its work.</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg></div>
+      <h3>Consent before change</h3>
+      <p>Every cleaning fix is shown with real examples before it touches a single cell. Nothing is applied silently.</p>
+    </div>
+    <div class="testimonial-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <h3>Originals never modified</h3>
+      <p>Your uploaded file stays untouched. Cleaning writes to a separate copy — re-run it any time with no risk.</p>
+    </div>
+    <div class="testimonial-card fade-up">
+      <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <h3>Anomalies flagged, not hidden</h3>
+      <p>Statistical outliers are surfaced for your review — flagged as signals worth a look, never silently dropped.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GET STARTED -->
+<section class="pricing">
+  <div class="section-header fade-up">
+    <h2>Start <span>Free</span></h2>
+    <p>No credit card. No setup calls.</p>
+  </div>
+  <div class="pricing-card fade-up">
+    <span class="pricing-badge">Free to use</span>
+    <h3>Everything, on the house</h3>
+    <p>Full cleaning pipeline, natural-language queries, and dashboard builder — no locked tiers.</p>
+    <ul class="pricing-features">
+      <li>Unlimited datasets</li>
+      <li>Automatic cleaning review</li>
+      <li>Natural-language queries</li>
+      <li>Live Google Sheets sync</li>
+      <li>Scheduled email reports</li>
+      <li>Shareable dashboard links</li>
+    </ul>
+    <button class="btn-primary" style="width:100%;justify-content:center" onclick="openModal('register')">Create Your Account →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 15l4-5 3 3 5-7"/></svg>
+    BI Dashboard
+  </div>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#" onclick="openModal('register');return false;">Get started</a>
+  </div>
+  <span class="footer-copy">© 2026 BI Dashboard. All rights reserved.</span>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal('login')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <h2>Welcome Back</h2>
+    <p class="modal-sub">Log in to continue to your dashboards</p>
+    <div class="alert-error" id="loginError"></div>
+    <form id="loginForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="loginEmail">Email Address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <div class="password-wrap">
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
+          <button type="button" class="eye-btn" onclick="togglePass('loginPassword', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" id="loginSubmitBtn" onclick="handleLogin()">Log In →</button>
+    </form>
+    <div class="modal-footer-link">Don't have an account? <a onclick="switchModal('login','register')">Register</a></div>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal('register')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <h2>Get Started Free</h2>
+    <p class="modal-sub">Create your account and start cleaning data today</p>
+    <div class="alert-error" id="registerError"></div>
+    <div class="alert-success" id="registerSuccess"></div>
+    <form id="registerForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="regFullName">Full Name</label>
+        <input type="text" id="regFullName" placeholder="Ali Khan" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label for="regEmail">Email Address</label>
+        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Password</label>
+        <div class="password-wrap">
+          <input type="password" id="regPassword" placeholder="Min. 8 characters" autocomplete="new-password"/>
+          <button type="button" class="eye-btn" onclick="togglePass('regPassword', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <span class="pwd-hint" id="regPwdHint">8+ characters, with uppercase, lowercase, a number &amp; a special character.</span>
+      </div>
+      <div class="form-group">
+        <label for="regConfirmPassword">Confirm Password</label>
+        <div class="password-wrap">
+          <input type="password" id="regConfirmPassword" placeholder="••••••••" autocomplete="new-password"/>
+          <button type="button" class="eye-btn" onclick="togglePass('regConfirmPassword', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" id="registerSubmitBtn" onclick="handleRegister()">Create Account →</button>
+    </form>
+    <div class="modal-footer-link">Already have an account? <a onclick="switchModal('register','login')">Log in</a></div>
+  </div>
+</div>
+
+<!-- App utilities: real API contract (OAuth2 form login, {email,password,full_name} register) -->
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+
+<script>
+// ── Auth-aware nav: signed-in visitors get a straight link to their dashboard ──
+(function () {
+  if (Auth.isAuthenticated()) {
+    document.getElementById('navActions').innerHTML =
+      '<a href="dashboard.html" class="btn-register">Go to Dashboard →</a>';
+  }
+})();
+
+// ── Password visibility toggle ──────────────────────────────────────────────
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const hidden = input.type === 'password';
+  input.type = hidden ? 'text' : 'password';
+  btn.innerHTML = hidden
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.97 9.97 0 0 1 12 4c7 0 11 8 11 8a18.45 18.45 0 0 1-5.07 5.93M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
+
+// ── Redirected here from a protected page (Auth.requireAuth) ────────────────
+// index.html's login modal is the app's real login entry point now — a link
+// like index.html?login=1&next=upload.html auto-opens the modal and, once
+// login succeeds, sends the visitor back to the page they actually wanted
+// instead of always dropping them on the dashboard.
+const _loginNext = (() => {
+  const raw = new URLSearchParams(window.location.search).get('next');
+  // Only allow a plain local "<name>.html" (optionally with its own query
+  // string) — never an absolute/external URL, to avoid an open-redirect.
+  return raw && /^[a-zA-Z0-9_-]+\.html(\?[^\s]*)?$/.test(raw) ? raw : null;
+})();
+if (new URLSearchParams(window.location.search).get('login') === '1') {
+  document.addEventListener('DOMContentLoaded', () => openModal('login'));
+}
+// Same idea for the "Get Started"/register entry point — index.html?register=1
+if (new URLSearchParams(window.location.search).get('register') === '1') {
+  document.addEventListener('DOMContentLoaded', () => openModal('register'));
+}
+
+// ── Modal open/close/switch ──────────────────────────────────────────────────
+function openModal(type) {
+  document.getElementById(type + 'Modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(type) {
+  document.getElementById(type + 'Modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function switchModal(from, to) {
+  closeModal(from);
+  setTimeout(() => openModal(to), 150);
+}
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) closeModal(el.id.replace('Modal', ''));
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal('login'); closeModal('register'); }
+});
+
+function showAlert(elId, msg) {
+  const el = document.getElementById(elId);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideAlert(elId) {
+  document.getElementById(elId).classList.remove('show');
+}
+
+// ── Login — wired to the real /auth/login OAuth2 form endpoint via Auth.login() ─
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginSubmitBtn');
+  hideAlert('loginError');
+
+  if (!email || !Auth.validateEmail(email)) {
+    showAlert('loginError', 'Please enter a valid email address.');
+    return;
+  }
+  if (!password) {
+    showAlert('loginError', 'Please enter your password.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Logging in…';
+  try {
+    const { user } = await Auth.login(email, password);
+    btn.textContent = 'Success — redirecting…';
+    window.location.href = _loginNext || (user?.is_admin ? 'admin.html' : 'dashboard.html');
+  } catch (err) {
+    showAlert('loginError', err.message || 'Login failed. Check your credentials.');
+    btn.disabled = false;
+    btn.textContent = 'Log In →';
+  }
+}
+
+// ── Register — wired to the real /auth/register endpoint via Auth.register() ──
+document.getElementById('regPassword').addEventListener('input', () => {
+  const hint = document.getElementById('regPwdHint');
+  const password = document.getElementById('regPassword').value;
+  if (!password) {
+    hint.textContent = '8+ characters, with uppercase, lowercase, a number & a special character.';
+    hint.className = 'pwd-hint';
+    return;
+  }
+  const v = Auth.validatePassword(password);
+  hint.textContent = (v.valid ? '✓ ' : '✗ ') + v.message;
+  hint.className = 'pwd-hint ' + (v.valid ? 'ok' : 'bad');
+});
+
+async function handleRegister() {
+  const fullName = document.getElementById('regFullName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirmPassword = document.getElementById('regConfirmPassword').value;
+  const btn = document.getElementById('registerSubmitBtn');
+  hideAlert('registerError');
+  hideAlert('registerSuccess');
+
+  if (fullName.length < 2) {
+    showAlert('registerError', 'Please enter your full name.');
+    return;
+  }
+  if (!email || !Auth.validateEmail(email)) {
+    showAlert('registerError', 'Please enter a valid email address.');
+    return;
+  }
+  const pwdCheck = Auth.validatePassword(password);
+  if (!pwdCheck.valid) {
+    showAlert('registerError', pwdCheck.message);
+    return;
+  }
+  if (password !== confirmPassword) {
+    showAlert('registerError', 'Passwords do not match.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating account…';
+  try {
+    await Auth.register(email, password, fullName);
+    showAlert('registerSuccess', 'Account created! Log in below to continue.');
+    document.getElementById('registerForm').reset();
+    setTimeout(() => {
+      document.getElementById('loginEmail').value = email;
+      switchModal('register', 'login');
+    }, 1200);
+  } catch (err) {
+    showAlert('registerError', err.message || 'Registration failed. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Account →';
+  }
+}
+
+// ── Scroll-reveal ─────────────────────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

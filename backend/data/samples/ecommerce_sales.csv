@@ -1,0 +1,15 @@
+date,product,category,revenue,quantity
+2024-01-15,Laptop,Electronics,1200.00,5
+2024-01-16,Mouse,Electronics,25.00,30
+2024-01-16,Keyboard,Electronics,75.00,20
+2024-01-17,Monitor,Electronics,350.00,8
+2024-01-18,Desk Chair,Furniture,200.00,12
+2024-01-18,Standing Desk,Furniture,450.00,6
+2024-01-19,Notebook,Stationery,5.00,100
+2024-01-19,Pen Set,Stationery,15.00,50
+2024-01-20,Coffee Maker,Appliances,80.00,15
+2024-01-21,Laptop,Electronics,1200.00,7
+2024-01-22,Monitor,Electronics,350.00,10
+2024-01-23,Desk Chair,Furniture,200.00,8
+2024-01-24,Notebook,Stationery,5.00,120
+2024-01-25,Coffee Maker,Appliances,80.00,10

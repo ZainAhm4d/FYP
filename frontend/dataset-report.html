@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Cleaning Report - BI Dashboard Generator</title>
+
+    <!-- Tailwind CSS CDN -->
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="assets/css/tailwind.build.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Tab styling */
+        .tab-btn { transition: all 0.15s; }
+        .tab-btn.active {
+            border-bottom: 3px solid #3B82F6;
+            color: #3B82F6;
+            font-weight: 600;
+        }
+
+        /* Data table */
+        .report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .report-table th {
+            background: #F1F5F9;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            white-space: nowrap;
+            border-bottom: 2px solid #E2E8F0;
+        }
+        .report-table td {
+            padding: 6px 12px;
+            border-bottom: 1px solid #F1F5F9;
+            color: #374151;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .report-table tr:hover td { background: #F8FAFC; }
+        .report-table td.null-cell { color: #9CA3AF; font-style: italic; }
+
+        /* Operations log */
+        .op-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Diff highlight */
+        .diff-removed { background: #FEE2E2; color: #B91C1C; }
+        .diff-added   { background: #DCFCE7; color: #15803D; }
+
+        /* Scrollable table wrapper */
+        .table-scroll {
+            overflow: auto;
+            max-height: 480px;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+        }
+
+        /* Stat cards */
+        .stat-card {
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+    </style>
+    <!-- Teal reference-style reskin (recolors indigo/blue -> teal, Nunito/Plus Jakarta Sans fonts) -->
+    <link rel="stylesheet" href="css/teal-theme.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Page content -->
+    <main class="max-w-7xl mx-auto px-6 pb-16 pt-8">
+
+        <!-- Back link + header -->
+        <div class="mb-6">
+            <a href="datasets.html" class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 mb-4">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Datasets
+            </a>
+
+            <!-- Loading state -->
+            <div id="loadingState" class="text-center py-20">
+                <div class="inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-gray-500">Loading cleaning report…</p>
+            </div>
+
+            <!-- Error state -->
+            <div id="errorState" class="hidden text-center py-20">
+                <div class="mb-4"><i data-lucide="alert-triangle" style="width:44px;height:44px;color:#D97706;"></i></div>
+                <p class="text-gray-600 text-lg" id="errorMessage">Failed to load report.</p>
+                <a href="datasets.html" class="mt-4 inline-block btn btn-primary">Back to Datasets</a>
+            </div>
+
+            <!-- Content (hidden until loaded) -->
+            <div id="pageContent" class="hidden">
+
+                <!-- Dataset title -->
+                <div class="bg-white border border-gray-100 rounded-2xl shadow-sm py-8 px-6 sm:px-8 mb-6 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:var(--primary-50);">
+                            <svg class="w-7 h-7" fill="none" stroke="var(--primary-600)" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m4 6V7m4 10v-3M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                        </span>
+                        <div>
+                            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-800" id="datasetName">—</h1>
+                            <p class="text-gray-500 text-base mt-1" id="datasetMeta">—</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="px-4 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-semibold" id="cleanedBadge">✓ Cleaned</span>
+                        <button id="processBtn" class="hidden px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors" onclick="processDataset()">
+                            Process Dataset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary stat cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="summaryCards">
+                    <!-- injected by JS -->
+                </div>
+
+                <!-- What was changed (CP-20) — injected by JS when an approved
+                     cleaning has been applied -->
+                <div id="appliedChanges" class="mb-8"></div>
+
+                <!-- Tabs -->
+                <div class="border-b border-gray-200 mb-6 flex gap-6 overflow-x-auto">
+                    <button class="tab-btn active pb-3 px-1 text-sm" data-tab="operations">Operations Log</button>
+                    <button class="tab-btn pb-3 px-1 text-sm text-gray-500" data-tab="raw">Raw Data</button>
+                    <button class="tab-btn pb-3 px-1 text-sm text-gray-500" data-tab="cleaned">Cleaned Data</button>
+                    <button class="tab-btn pb-3 px-1 text-sm text-gray-500" data-tab="columns">Column Analysis</button>
+                    <button class="tab-btn pb-3 px-1 text-sm text-gray-500" data-tab="anomalies">Anomalies</button>
+                </div>
+
+                <!-- Operations Log tab -->
+                <div id="tab-operations" class="tab-content">
+                    <p class="text-sm text-gray-500 mb-4">Every transformation applied to your data during the cleaning pipeline.</p>
+                    <div id="operationsList" class="space-y-3">
+                        <!-- injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Raw Data tab -->
+                <div id="tab-raw" class="tab-content hidden">
+                    <p class="text-sm text-gray-500 mb-3">First 100 rows of the <strong>original uploaded file</strong> — no changes applied.</p>
+                    <div id="rawTableLoading" class="text-center py-10 text-gray-400">Loading…</div>
+                    <div id="rawTableContainer" class="table-scroll hidden"></div>
+                </div>
+
+                <!-- Cleaned Data tab -->
+                <div id="tab-cleaned" class="tab-content hidden">
+                    <p class="text-sm text-gray-500 mb-3">First 100 rows of the <strong>cleaned &amp; processed file</strong> — this is what analyses use.</p>
+                    <div id="cleanedTableLoading" class="text-center py-10 text-gray-400">Loading…</div>
+                    <div id="cleanedTableContainer" class="table-scroll hidden"></div>
+                </div>
+
+                <!-- Column Analysis tab -->
+                <div id="tab-columns" class="tab-content hidden">
+                    <p class="text-sm text-gray-500 mb-4">Detected data type and any changes made per column.</p>
+                    <div id="columnAnalysisList" class="grid md:grid-cols-2 gap-4">
+                        <!-- injected by JS -->
+                    </div>
+                </div>
+
+                <!-- CH-20: Anomalies tab (flag-only, nothing here changes data) -->
+                <div id="tab-anomalies" class="tab-content hidden">
+                    <p class="text-sm text-gray-500 mb-4">
+                        Statistical outliers in your numeric columns — flagged for your attention,
+                        never removed or changed automatically.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <label class="text-xs font-semibold text-gray-600">Column
+                            <select id="anomalyColumnSelect"
+                                class="ml-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white">
+                                <option value="">All numeric columns</option>
+                            </select>
+                        </label>
+                        <label class="text-xs font-semibold text-gray-600">Sensitivity
+                            <select id="anomalySensitivity"
+                                class="ml-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white">
+                                <option value="2.5">High (flags more)</option>
+                                <option value="3.0" selected>Standard</option>
+                                <option value="3.5">Low (only extremes)</option>
+                            </select>
+                        </label>
+                        <button id="anomalyRescanBtn"
+                            class="text-xs font-semibold text-indigo-700 border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-lg">
+                            Re-scan
+                        </button>
+                    </div>
+                    <div id="anomalyResults"><p class="text-sm text-gray-400">Open this tab to run the scan.</p></div>
+                </div>
+
+            </div><!-- /pageContent -->
+        </div>
+    </main>
+
+    <!-- Notification container -->
+    <div id="notification-container"
+         style="position:fixed;top:1rem;right:1rem;z-index:99999;display:flex;flex-direction:column;gap:0.5rem;"></div>
+
+    <!-- JS dependencies -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/notifications.js"></script>
+    <script src="js/components/loading.js"></script>
+    <script src="js/pages/dataset-report.js"></script>
+
+    <script>
+        Auth.requireAuth();
+        Navbar.init('datasets');
+    </script>
+    <script>
+    (function () {
+        function renderIcons() { if (window.lucide) { try { lucide.createIcons(); } catch (_) {} } }
+        let t = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            renderIcons();
+            new MutationObserver(() => { clearTimeout(t); t = setTimeout(renderIcons, 80); })
+                .observe(document.body, { childList: true, subtree: true });
+        });
+    })();
+    </script>
+</body>
+</html>

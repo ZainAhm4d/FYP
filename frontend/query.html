@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Builder - BI Dashboard Generator</title>
+
+    <!-- Tailwind CSS CDN -->
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="assets/css/tailwind.build.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Plotly.js CDN -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/tooltips.css">
+    <link rel="stylesheet" href="css/empty-states.css">
+    <link rel="stylesheet" href="css/form-validation.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <style>
+        /* Smooth collapse animation */
+        .collapsible-body {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s ease;
+        }
+        .collapsible-body.open {
+            grid-template-rows: 1fr;
+        }
+        .collapsible-body > div {
+            overflow: hidden;
+        }
+        /* Chevron rotation */
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+        .chevron-icon.rotated {
+            transform: rotate(180deg);
+        }
+        /* Dataset card hover */
+        .dataset-option-card {
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .dataset-option-card:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+        }
+        .dataset-option-card.selected {
+            border-color: #7c3aed;
+            background: #faf5ff;
+        }
+    </style>
+    <!-- Teal reference-style reskin (recolors indigo/blue -> teal, Nunito/Plus Jakarta Sans fonts) -->
+    <link rel="stylesheet" href="css/teal-theme.css">
+</head>
+<body class="font-['Inter'] bg-gray-50">
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="pt-8 px-4 sm:px-6 lg:px-8 pb-16 min-h-screen">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- ─── Page Header ─────────────────────────────────────── -->
+            <div class="bg-white border border-gray-100 rounded-2xl shadow-sm py-8 px-6 sm:px-8 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:var(--primary-50);">
+                        <svg class="w-7 h-7" fill="none" stroke="var(--primary-600)" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </span>
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-800">Query Builder</h1>
+                        <p class="text-gray-500 text-base sm:text-lg mt-1">Ask questions in plain English, or build queries with templates.</p>
+                    </div>
+                </div>
+                <a href="upload.html" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-sm font-semibold border transition-colors flex-shrink-0"
+                   style="border-color:var(--line-200); color:var(--ink-700); background:var(--surface);">
+                    <i data-lucide="upload" style="width:15px;height:15px;color:var(--ink-400);"></i>Upload New Dataset
+                </a>
+            </div>
+
+            <!-- ─── STEP 1: Dataset Selection ──────────────────────── -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 mb-6">
+                <!-- Card header -->
+                <div class="px-8 py-5 border-b border-gray-100 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800">Select Your Dataset</h2>
+                        <p class="text-sm text-gray-500">Choose the data you want to explore</p>
+                    </div>
+                    <a href="upload.html" class="ml-auto text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Upload new
+                    </a>
+                </div>
+
+                <div class="p-8">
+                    <!-- Dropdown selector -->
+                    <select id="datasetSelect" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white text-gray-800 font-medium text-base mb-6">
+                        <option value="">-- Choose a dataset --</option>
+                    </select>
+
+                    <!-- Dataset info panel (hidden until selection) -->
+                    <div id="datasetInfoPanel" class="hidden">
+                        <div class="bg-gradient-to-r from-indigo-50 to-indigo-50 border border-indigo-200 rounded-xl p-6">
+                            <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+                                <!-- Icon -->
+                                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                </div>
+                                <!-- Meta -->
+                                <div class="flex-1 min-w-0">
+                                    <h3 id="dsInfoName" class="text-lg font-bold text-gray-800 truncate mb-1"></h3>
+                                    <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                                            <strong id="dsInfoRows"></strong> rows
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"></path></svg>
+                                            <strong id="dsInfoCols"></strong> columns
+                                        </span>
+                                        <span id="dsInfoCleanedBadge" class="hidden items-center gap-1">
+                                            <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <span class="text-green-700 font-medium">Cleaned</span>
+                                        </span>
+                                        <span id="dsInfoDate" class="text-gray-400"></span>
+                                    </div>
+                                    <!-- Column pills -->
+                                    <div id="dsInfoColumns" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ready indicator -->
+                        <div class="mt-4 flex items-center gap-2 text-sm text-green-700 font-medium">
+                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Dataset loaded — you can now ask a question or build a query below.
+                        </div>
+                    </div>
+
+                    <!-- Empty prompt -->
+                    <div id="datasetEmptyHint" class="text-center py-6 text-gray-400">
+                        <svg class="w-10 h-10 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                        <p class="text-sm">Select a dataset above to get started</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Query History Panel (shown when dataset selected & has history) ── -->
+            <div id="queryHistoryPanel" class="hidden bg-white rounded-xl shadow-lg border border-gray-200 mb-6">
+                <div class="px-8 py-5 border-b border-gray-100 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-base font-bold text-gray-800">Recent Queries</h2>
+                        <p class="text-xs text-gray-500">Click any query to re-run it instantly</p>
+                    </div>
+                    <button id="historyCloseBtn" class="text-gray-400 hover:text-gray-600 text-xs font-medium">Hide</button>
+                </div>
+                <div id="historyList" class="divide-y divide-gray-50 max-h-64 overflow-y-auto"></div>
+            </div>
+
+            <!-- ─── STEP 2: AI Natural Language Query ──────────────── -->
+            <div id="nlpCard" class="bg-white rounded-xl shadow-lg border border-indigo-200 mb-6 opacity-50 pointer-events-none transition-opacity duration-300">
+                <div class="px-8 py-5 border-b border-indigo-100 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800">Ask in Plain English</h2>
+                        <p class="text-sm text-gray-500">Describe what you want to see — the AI builds the query automatically</p>
+                    </div>
+                    <span id="nlpModeBadge" class="ml-auto hidden text-xs font-medium px-3 py-1 rounded-full"></span>
+                </div>
+
+                <div class="p-8">
+                    <!-- NLP Input row -->
+                    <div class="flex gap-3 mb-4">
+                        <input
+                            id="nlpInput"
+                            type="text"
+                            placeholder='e.g. "show top 5 products by revenue" or "sales trend by month"'
+                            class="flex-1 px-4 py-3 border-2 border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-800 placeholder-gray-400 text-base"
+                        />
+                        <button
+                            id="nlpAnalyzeBtn"
+                            class="bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition-all flex items-center gap-2 whitespace-nowrap"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Analyze
+                        </button>
+                    </div>
+
+                    <!-- Example chips -->
+                    <div class="flex flex-wrap gap-2 mb-5">
+                        <span class="text-xs text-gray-400 self-center">Try:</span>
+                        <button onclick="setNlpExample(this)" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full transition-colors border border-indigo-100">top 5 products by revenue</button>
+                        <button onclick="setNlpExample(this)" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full transition-colors border border-indigo-100">sales trend by month</button>
+                        <button onclick="setNlpExample(this)" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full transition-colors border border-indigo-100">compare revenue by category</button>
+                        <button onclick="setNlpExample(this)" class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full transition-colors border border-indigo-100">distribution of prices</button>
+                    </div>
+
+                    <!-- NLP Result Panel -->
+                    <div id="nlpResultPanel" class="hidden">
+                        <!-- Clarification -->
+                        <div id="nlpClarification" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-4 mb-3">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p id="nlpClarificationText" class="text-sm text-amber-800 whitespace-pre-line"></p>
+                            </div>
+                        </div>
+                        <!-- Detected -->
+                        <div id="nlpDetected" class="hidden bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="font-semibold text-green-800">Detected:</span>
+                                <span id="nlpIntentBadge" class="text-xs font-bold bg-green-700 text-white px-2 py-1 rounded"></span>
+                                <span id="nlpConfidence" class="text-xs text-green-600"></span>
+                            </div>
+                            <div id="nlpParamsList" class="text-sm text-green-800 space-y-1 mb-3"></div>
+                            <button id="nlpExecuteBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Run This Query
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── STEP 3: Manual Query Builder (collapsed) ────────── -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 mb-8">
+                <!-- Toggle header — always visible -->
+                <button
+                    id="manualBuilderToggle"
+                    onclick="toggleManualBuilder()"
+                    class="w-full px-8 py-5 flex items-center gap-3 text-left hover:bg-gray-50 transition-colors rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-inset"
+                >
+                    <div class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center text-sm font-bold flex-shrink-0" id="manualBuilderStepNum">3</div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-lg font-bold text-gray-800">Build Your Own Query</h2>
+                            <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">Template Builder</span>
+                        </div>
+                        <p class="text-sm text-gray-500">Choose a template and configure parameters manually for full control</p>
+                    </div>
+                    <svg id="manualBuilderChevron" class="chevron-icon w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <!-- Collapsible body -->
+                <div class="collapsible-body" id="manualBuilderBody">
+                    <div>
+                        <div class="border-t border-gray-100 px-8 pt-6 pb-8">
+
+                            <!-- How to use -->
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+                                <div class="flex items-start gap-3 mb-4">
+                                    <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <h3 class="font-bold text-blue-900">How the Template Builder works</h3>
+                                </div>
+                                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div class="bg-white rounded-lg p-4 border border-blue-100">
+                                        <div class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mb-2">1</div>
+                                        <p class="text-sm font-semibold text-gray-800 mb-1">Pick a template</p>
+                                        <p class="text-xs text-gray-500">5 analysis types: Trend, Comparison, Distribution, Top-K, Scatter</p>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-4 border border-blue-100">
+                                        <div class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mb-2">2</div>
+                                        <p class="text-sm font-semibold text-gray-800 mb-1">Map your columns</p>
+                                        <p class="text-xs text-gray-500">Assign which column goes to which role (metric, date, category)</p>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-4 border border-blue-100">
+                                        <div class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mb-2">3</div>
+                                        <p class="text-sm font-semibold text-gray-800 mb-1">Adjust options</p>
+                                        <p class="text-xs text-gray-500">Set aggregation (sum/avg), time granularity, K value, sort order</p>
+                                    </div>
+                                    <div class="bg-white rounded-lg p-4 border border-blue-100">
+                                        <div class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mb-2">4</div>
+                                        <p class="text-sm font-semibold text-gray-800 mb-1">Execute</p>
+                                        <p class="text-xs text-gray-500">Generate your chart — then add it to a dashboard</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-blue-700 mt-4 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                    Tip: If you're not sure which template to pick, use the AI query above — it chooses automatically.
+                                </p>
+                            </div>
+
+                            <!-- Template selection -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                    Choose Analysis Template
+                                </label>
+                                <select id="templateSelect" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white text-gray-800 font-medium" disabled>
+                                    <option value="">-- Select a dataset first --</option>
+                                </select>
+                            </div>
+
+                            <!-- Template Description -->
+                            <div id="templateDescription" class="mb-6 p-5 bg-gradient-to-r from-indigo-50 to-indigo-50 border-l-4 border-indigo-600 rounded-lg hidden">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-indigo-600 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-sm text-indigo-900 font-medium"></p>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Parameter Form -->
+                            <div id="parameterForm" class="mb-6 hidden">
+                                <div class="border-t pt-6">
+                                    <h3 class="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                        </svg>
+                                        Query Parameters
+                                    </h3>
+                                    <div id="parametersContainer" class="grid md:grid-cols-2 gap-4">
+                                        <!-- Dynamic parameters will be inserted here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Execute Button -->
+                            <div class="flex justify-start pt-6 border-t">
+                                <button id="executeButton" class="bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 text-white font-bold px-10 py-4 rounded-lg text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center gap-2" disabled>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    Execute Query &amp; Generate Chart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Results Section ─────────────────────────────────── -->
+            <div id="resultsSection" class="hidden space-y-6">
+                <!-- Insights Card -->
+                <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-indigo-50 rounded-xl shadow-lg p-8 border border-indigo-200">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800">Key Insights</h3>
+                                <p class="text-xs text-indigo-500 mt-0.5">AI-generated findings from your data</p>
+                            </div>
+                        </div>
+                        <span id="insightCount" class="text-xs font-semibold bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full hidden"></span>
+                    </div>
+                    <div id="insightsList" class="space-y-2"></div>
+                    <p class="mt-4 text-xs text-gray-400 flex items-center gap-1">
+                        <span>Confidence:</span>
+                        <span class="font-semibold text-green-600">High ≥90%</span>
+                        <span class="mx-1">·</span>
+                        <span class="font-semibold text-amber-600">Med ≥70%</span>
+                        <span class="mx-1">·</span>
+                        <span class="font-semibold text-gray-400">Low &lt;70%</span>
+                    </p>
+                </div>
+
+                <!-- Anomaly Card (hidden when no anomalies) -->
+                <div id="anomalyPanel" class="hidden bg-white rounded-xl shadow-xl p-8 border border-red-100">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                            <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600"><i data-lucide="alert-triangle" style="width:18px;height:18px;"></i></span>
+                            Anomalies Detected
+                        </h3>
+                        <span id="anomalyCount" class="text-sm font-semibold bg-red-100 text-red-700 px-3 py-1 rounded-full"></span>
+                    </div>
+                    <div id="anomalyList" class="space-y-2"></div>
+                </div>
+
+                <!-- Chart Card -->
+                <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                            <svg class="w-7 h-7 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                            </svg>
+                            Visualization
+                        </h3>
+                        <!-- Forecast toggle — only shown for trend charts -->
+                        <button id="forecastBtn"
+                                class="hidden items-center gap-2 border-2 border-indigo-500 text-indigo-600
+                                       hover:bg-indigo-50 font-semibold px-4 py-2.5 rounded-lg text-sm
+                                       transition-all"
+                                onclick="toggleForecast()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                            <span id="forecastBtnLabel">Show Forecast</span>
+                        </button>
+
+                        <button id="addToDashboardButton" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center" disabled>
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Add to Dashboard
+                        </button>
+                    </div>
+                    <!-- Chart controls: type, recommendation, color -->
+                    <div id="chartControls" class="hidden flex-wrap items-center gap-3 mb-4 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-semibold text-gray-600">Chart type</label>
+                            <select id="chartTypeSelect" onchange="changeChartType(this.value)"
+                                class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                                <option value="auto">Auto</option>
+                                <option value="line">Line</option>
+                                <option value="area">Area</option>
+                                <option value="bar">Bar</option>
+                                <option value="stacked_bar">Stacked bar</option>
+                                <option value="horizontal_bar">Horizontal bar</option>
+                                <option value="stacked_horizontal">Stacked horizontal</option>
+                                <option value="scatter">Scatter</option>
+                                <option value="pie">Pie</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-semibold text-gray-600">Color</label>
+                            <input type="color" id="chartColorPicker" value="#0d9488"
+                                onchange="applyChartColor(this.value)"
+                                class="w-9 h-8 border border-gray-300 rounded-lg cursor-pointer bg-white p-0.5">
+                        </div>
+                        <span id="chartRecommendation" class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-3 py-1"></span>
+                    </div>
+
+                    <div id="chartContainer" class="min-h-[500px] bg-gray-50 rounded-lg p-4"></div>
+
+                    <!-- Chart chat: natural-language edits -->
+                    <div id="chartChatWrap" class="hidden mt-4">
+                        <div class="flex gap-2">
+                            <input id="chartChatInput" type="text"
+                                placeholder='Edit with words — e.g. "make the bars green", "change to line chart", "title Monthly Revenue"'
+                                class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                onkeydown="if(event.key==='Enter')handleChartChat()">
+                            <button onclick="handleChartChat()"
+                                class="bg-gray-800 hover:bg-gray-900 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors">
+                                Apply
+                            </button>
+                        </div>
+                        <p id="chartChatFeedback" class="text-xs text-gray-400 mt-1.5"></p>
+                    </div>
+                </div>
+
+                <!-- Data Table Card -->
+                <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <svg class="w-7 h-7 mr-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        Query Results
+                    </h3>
+                    <div id="dataTableContainer" class="overflow-x-auto bg-gray-50 rounded-lg p-4"></div>
+                </div>
+            </div>
+
+            <!-- ─── Empty State ─────────────────────────────────────── -->
+            <div id="emptyState" class="bg-white rounded-xl shadow-lg text-center py-16 px-6">
+                <div class="max-w-md mx-auto">
+                    <div class="w-24 h-24 bg-gradient-to-br from-indigo-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-12 h-12 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Your chart will appear here</h3>
+                    <p class="text-gray-500">Select a dataset above, then ask a question in plain English or build a query with the template builder.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Unsaved chart changes — shown for in-app navigation (navbar links etc).
+         Actually closing the tab / typing a new URL / refreshing still shows
+         the browser's own native prompt — that one can't be replaced with
+         custom UI, browsers block that for security. -->
+    <div id="unsavedChartModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-3">Leave without saving?</h2>
+            <p class="text-gray-600 mb-6">
+                You've changed this chart's color, title, legend, or gridlines, but haven't added it to a
+                dashboard yet. Leaving now will lose that change.
+            </p>
+            <div class="flex gap-4 justify-end">
+                <button id="unsavedChartCancelBtn" class="btn btn-secondary px-6 py-3">Stay on this page</button>
+                <button id="unsavedChartLeaveBtn" class="btn bg-red-600 text-white hover:bg-red-700 px-6 py-3">Leave anyway</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils/validation.js"></script>
+    <script src="js/components/skeleton-loader.js"></script>
+    <script src="js/components/tooltip.js"></script>
+    <script src="js/components/empty-states.js"></script>
+    <script src="js/components/notifications.js"></script>
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/loading.js"></script>
+    <script src="js/visualization/chart-renderer.js"></script>
+    <script src="js/visualization/dashboard-layout.js"></script>
+    <script src="js/pages/query.js"></script>
+
+    <script>
+        Auth.requireAuth();
+        Navbar.init('query');
+        document.addEventListener('DOMContentLoaded', () => {
+            initQueryPage();
+        });
+    </script>
+    <script>
+    (function () {
+        function renderIcons() { if (window.lucide) { try { lucide.createIcons(); } catch (_) {} } }
+        let t = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            renderIcons();
+            new MutationObserver(() => { clearTimeout(t); t = setTimeout(renderIcons, 80); })
+                .observe(document.body, { childList: true, subtree: true });
+        });
+    })();
+    </script>
+
+    <!-- Add-to-dashboard picker: choose an existing dashboard or start a new one -->
+    <div id="addToDashModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                <h2 class="text-white font-bold text-lg">Add chart to…</h2>
+                <button id="closeAddToDashModal" class="text-white/70 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <button id="addToNewDashboardBtn"
+                    class="w-full flex items-center gap-3 border-2 border-dashed border-indigo-300 bg-indigo-50 hover:bg-indigo-100 rounded-xl px-4 py-3 mb-4 text-left transition-colors">
+                    <span class="w-9 h-9 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-lg font-bold flex-shrink-0">+</span>
+                    <span>
+                        <span class="block text-sm font-bold text-indigo-800">New dashboard</span>
+                        <span class="block text-xs text-indigo-600">Opens the builder to arrange and save</span>
+                    </span>
+                </button>
+                <p class="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Or add to an existing dashboard</p>
+                <div id="addToDashList" class="max-h-64 overflow-y-auto space-y-1.5">
+                    <p class="text-sm text-gray-400 py-3">Loading your dashboards…</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

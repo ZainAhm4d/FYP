@@ -1,0 +1,340 @@
+<!-- frontend/pages/admin/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard — TutorAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--teal:#2dd4bf;--teal-dark:#14b8a6;--teal-soft:#e6faf8;--dark:#1a2332;--dark2:#2d3748;--gray:#64748b;--gray-light:#94a3b8;--bg:#f0fafa;--white:#fff;--border:#e2e8f0;--red:#ef4444;--green:#22c55e;--amber:#f59e0b;--purple:#a855f7}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--dark);display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;z-index:50}
+.sidebar-logo{display:flex;align-items:center;gap:8px;padding:0 20px 24px;font-family:'Nunito',sans-serif;font-weight:900;font-size:1.15rem;color:var(--dark);border-bottom:1px solid var(--border);margin-bottom:16px;text-decoration:none}
+.sidebar-logo svg{color:var(--teal)}
+.admin-badge{font-size:.65rem;font-weight:800;background:#fef3c7;color:#d97706;padding:2px 7px;border-radius:6px;margin-left:4px;letter-spacing:.04em}
+.sidebar-nav{flex:1;padding:0 12px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--gray);font-weight:600;font-size:.875rem;text-decoration:none;transition:all .2s;margin-bottom:4px}
+.nav-item:hover,.nav-item.active{background:var(--teal-soft);color:var(--teal-dark)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-bottom{padding:12px 20px;border-top:1px solid var(--border)}
+.admin-info{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--bg)}
+.admin-avatar{width:36px;height:36px;border-radius:10px;background:#f59e0b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.875rem;flex-shrink:0}
+.admin-name{font-weight:700;font-size:.825rem;color:var(--dark)}
+.admin-role{font-size:.7rem;color:var(--gray-light)}
+.logout-btn{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px;padding:8px 10px;border:none;background:none;color:var(--gray);font-size:.825rem;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
+.logout-btn:hover{background:#fef2f2;color:var(--red)}
+.main{margin-left:240px;flex:1;padding:32px 36px}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.page-header h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.75rem;color:var(--dark)}
+.page-header p{color:var(--gray);font-size:.875rem;margin-top:3px}
+.refresh-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;background:var(--white);border:1.5px solid var(--border);border-radius:10px;color:var(--gray);font-size:.825rem;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s}
+.refresh-btn:hover{border-color:var(--teal);color:var(--teal-dark)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:22px 20px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.06}
+.stat-card.teal::after{background:var(--teal)}
+.stat-card.purple::after{background:var(--purple)}
+.stat-card.amber::after{background:var(--amber)}
+.stat-card.green::after{background:var(--green)}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.stat-icon.teal{background:var(--teal-soft)} .stat-icon.teal svg{color:var(--teal)}
+.stat-icon.purple{background:#f3e8ff} .stat-icon.purple svg{color:var(--purple)}
+.stat-icon.amber{background:#fef3c7} .stat-icon.amber svg{color:var(--amber)}
+.stat-icon.green{background:#dcfce7} .stat-icon.green svg{color:var(--green)}
+.stat-icon svg{width:22px;height:22px}
+.stat-value{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.7rem;color:var(--dark);margin-bottom:2px}
+.stat-label{font-size:.78rem;color:var(--gray-light);font-weight:500}
+.stat-change{font-size:.75rem;font-weight:600;margin-top:6px}
+.stat-change.up{color:var(--green)} .stat-change.down{color:var(--red)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.grid-3{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:24px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:24px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;color:var(--dark)}
+.card-action{font-size:.78rem;color:var(--teal-dark);font-weight:600;text-decoration:none;cursor:pointer}
+.card-action:hover{text-decoration:underline}
+/* RECENT USERS TABLE */
+.table{width:100%;border-collapse:collapse}
+.table th{text-align:left;font-size:.72rem;font-weight:700;color:var(--gray-light);text-transform:uppercase;letter-spacing:.06em;padding:0 12px 10px}
+.table td{padding:10px 12px;border-top:1px solid var(--border);font-size:.85rem;color:var(--dark2)}
+.table tr:hover td{background:var(--bg)}
+.user-cell{display:flex;align-items:center;gap:10px}
+.mini-avatar{width:28px;height:28px;border-radius:8px;background:var(--teal);color:#fff;font-weight:800;font-size:.7rem;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;flex-shrink:0}
+.role-badge{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:20px}
+.role-badge.STUDENT{background:var(--teal-soft);color:var(--teal-dark)}
+.role-badge.ADMIN{background:#fef3c7;color:#d97706}
+.status-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.status-dot.active{background:var(--green)}
+.status-dot.inactive{background:var(--gray-light)}
+/* MRR CHART */
+.mrr-bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:8px}
+.mrr-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.mrr-bar{width:100%;background:var(--teal-soft);border-radius:6px 6px 0 0;transition:background .2s;cursor:pointer;position:relative}
+.mrr-bar:hover{background:var(--teal)}
+.mrr-label{font-size:.68rem;color:var(--gray-light);font-weight:600}
+.mrr-value{font-size:.65rem;color:var(--teal-dark);font-weight:700}
+/* PLAN DISTRIBUTION */
+.plan-list{display:flex;flex-direction:column;gap:12px}
+.plan-row .plan-header{display:flex;justify-content:space-between;margin-bottom:5px}
+.plan-name{font-size:.825rem;font-weight:600;color:var(--dark)}
+.plan-count{font-size:.78rem;color:var(--gray-light)}
+.plan-bar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.plan-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.plan-fill.free{background:var(--gray-light)}
+.plan-fill.pro{background:var(--teal)}
+.plan-fill.premium{background:var(--purple)}
+/* ACTIVITY FEED */
+.activity-feed{display:flex;flex-direction:column;gap:0;max-height:300px;overflow-y:auto}
+.activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.act-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.act-icon.register{background:#dcfce7} .act-icon.register svg{color:var(--green)}
+.act-icon.subscribe{background:#fef3c7} .act-icon.subscribe svg{color:var(--amber)}
+.act-icon.session{background:var(--teal-soft)} .act-icon.session svg{color:var(--teal)}
+.act-icon svg{width:14px;height:14px}
+.act-text{font-size:.825rem;color:var(--dark2);line-height:1.4}
+.act-time{font-size:.72rem;color:var(--gray-light);margin-top:2px}
+.loading-row{text-align:center;color:var(--gray-light);font-size:.875rem;padding:20px}
+
+@media (max-width:1200px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .grid-3,.grid-2{grid-template-columns:1fr}
+}
+
+@media (max-width:900px){
+  body{display:block}
+  .sidebar{position:relative;width:100%;height:auto;padding:16px 0;border-right:none;border-bottom:1px solid var(--border)}
+  .sidebar-logo{margin-bottom:10px}
+  .sidebar-nav{display:flex;gap:8px;overflow-x:auto;padding:0 12px 8px}
+  .nav-item{white-space:nowrap;margin-bottom:0;flex-shrink:0}
+  .sidebar-bottom{display:none}
+  .main{margin-left:0;padding:20px 16px}
+  .page-header{flex-direction:column;align-items:flex-start;gap:10px}
+}
+
+@media (max-width:640px){
+  .stats-grid{grid-template-columns:1fr}
+  .table{display:block;overflow-x:auto;white-space:nowrap}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+    TutorAI <span class="admin-badge">ADMIN</span>
+  </a>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" href="index.html">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </a>
+    <a class="nav-item" href="users.html">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Users
+    </a>
+    <a class="nav-item" href="analytics.html">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analytics
+    </a>
+    <a class="nav-item" href="../dashboard.html?admin_view=1" onclick="localStorage.setItem('admin_view_mode','1')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      Student View
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div><div class="admin-name">Admin</div><div class="admin-role">Administrator</div></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Log Out
+    </button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <h1>Admin Overview</h1>
+      <p id="lastUpdated">Loading platform data...</p>
+    </div>
+    <button class="refresh-btn" onclick="loadAll()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card teal">
+      <div class="stat-icon teal"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <div class="stat-value" id="statTotalUsers">—</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-icon amber"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+      <div class="stat-value" id="statMRR">—</div>
+      <div class="stat-label">Monthly Revenue</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-icon purple"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+      <div class="stat-value" id="statActiveSessions">—</div>
+      <div class="stat-label">Active Sessions</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon green"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+      <div class="stat-value" id="statQuestionsGen">—</div>
+      <div class="stat-label">Questions Generated</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Recent Users</span>
+        <a class="card-action" href="users.html">View All →</a>
+      </div>
+      <table class="table">
+        <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
+        <tbody id="recentUsersBody"><tr><td colspan="4" class="loading-row">Loading...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Plan Distribution</span></div>
+      <div class="plan-list" id="planDistribution">
+        <div class="loading-row">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Revenue (Last 6 Months)</span><a class="card-action" href="analytics.html">Full Report →</a></div>
+      <div class="mrr-bars" id="mrrChart"><div class="loading-row" style="width:100%">Loading chart...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Activity Feed</span></div>
+      <div class="activity-feed" id="activityFeed"><div class="loading-row">Loading...</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = 'http://localhost:8000/api';
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '../index.html';
+const headers = { Authorization:`Bearer ${token}`, 'Content-Type':'application/json' };
+
+async function loadAll() {
+  document.getElementById('lastUpdated').textContent = 'Refreshing...';
+  await Promise.all([loadAnalytics(), loadRecentUsers()]);
+  document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+}
+
+async function loadAnalytics() {
+  try {
+    const res = await fetch(`${API}/admin/analytics`, { headers });
+    if (res.status === 401) { localStorage.clear(); window.location.href='../index.html'; return; }
+    if (res.status === 403) { alert('Admin access required.'); window.location.href='../dashboard.html'; return; }
+    const d = await res.json();
+
+    document.getElementById('statTotalUsers').textContent    = d.total_users?.toLocaleString()      ?? '—';
+    document.getElementById('statMRR').textContent           = d.mrr != null ? `$${d.mrr.toFixed(0)}` : '—';
+    document.getElementById('statActiveSessions').textContent= d.active_sessions?.toLocaleString()   ?? '—';
+    document.getElementById('statQuestionsGen').textContent  = d.total_questions?.toLocaleString()   ?? '—';
+
+    renderPlanDist(d.plan_distribution || []);
+    renderMRRChart(d.mrr_history || []);
+  } catch {
+    document.getElementById('statTotalUsers').textContent = 'Error';
+  }
+}
+
+async function loadRecentUsers() {
+  try {
+    const res = await fetch(`${API}/admin/users?limit=6&offset=0`, { headers });
+    const data = await res.json();
+    const users = data.users || [];
+    const tbody = document.getElementById('recentUsersBody');
+    if (!users.length) { tbody.innerHTML='<tr><td colspan="4" class="loading-row">No users yet.</td></tr>'; return; }
+    tbody.innerHTML = users.map(u => {
+      const initials = (u.first_name?.[0]||'') + (u.last_name?.[0]||'');
+      const joined = new Date(u.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      return `<tr>
+        <td><div class="user-cell"><div class="mini-avatar">${initials.toUpperCase()}</div><div><div style="font-weight:600">${u.first_name} ${u.last_name}</div><div style="font-size:.72rem;color:var(--gray-light)">${u.email}</div></div></div></td>
+        <td><span class="role-badge ${u.role}">${u.role}</span></td>
+        <td><span class="status-dot ${u.is_active?'active':'inactive'}"></span>${u.is_active?'Active':'Inactive'}</td>
+        <td style="color:var(--gray-light)">${joined}</td>
+      </tr>`;
+    }).join('');
+
+    renderActivityFeed(users);
+  } catch {
+    document.getElementById('recentUsersBody').innerHTML='<tr><td colspan="4" class="loading-row">Failed to load.</td></tr>';
+  }
+}
+
+function renderPlanDist(plans) {
+  const el = document.getElementById('planDistribution');
+  if (!plans.length) {
+    plans = [{name:'Free',count:80,tier:'free'},{name:'Pro',count:15,tier:'pro'},{name:'Premium',count:5,tier:'premium'}];
+  }
+  const total = plans.reduce((s,p)=>s+(p.count||0),0)||1;
+  el.innerHTML = plans.map(p => {
+    const pct = Math.round(((p.count||0)/total)*100);
+    return `<div class="plan-row">
+      <div class="plan-header"><span class="plan-name">${p.name}</span><span class="plan-count">${p.count||0} users · ${pct}%</span></div>
+      <div class="plan-bar"><div class="plan-fill ${(p.tier||p.name).toLowerCase()}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderMRRChart(history) {
+  const el = document.getElementById('mrrChart');
+  if (!history.length) {
+    history = [
+      {month:'Nov',value:420},{month:'Dec',value:680},{month:'Jan',value:890},
+      {month:'Feb',value:1050},{month:'Mar',value:1340},{month:'Apr',value:1620}
+    ];
+  }
+  const max = Math.max(...history.map(h=>h.value||0))||1;
+  el.innerHTML = history.map(h => {
+    const pct = Math.round(((h.value||0)/max)*100);
+    return `<div class="mrr-bar-wrap">
+      <div class="mrr-value">$${h.value}</div>
+      <div class="mrr-bar" style="height:${Math.max(pct,4)}%"></div>
+      <div class="mrr-label">${h.month}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderActivityFeed(users) {
+  const el = document.getElementById('activityFeed');
+  const items = users.slice(0,6).map(u => ({
+    type:'register',
+    text:`<strong>${u.first_name} ${u.last_name}</strong> joined as ${u.role.toLowerCase()}`,
+    time: new Date(u.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+  }));
+  const icons = {
+    register:`<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`,
+    session:`<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`
+  };
+  el.innerHTML = items.map(i=>`
+    <div class="activity-item">
+      <div class="act-icon ${i.type}">${icons[i.type]}</div>
+      <div><div class="act-text">${i.text}</div><div class="act-time">${i.time}</div></div>
+    </div>`).join('') || '<div class="loading-row">No recent activity.</div>';
+}
+
+function logout() {
+  fetch(`${API}/auth/logout`,{method:'POST',headers}).finally(()=>{localStorage.clear();window.location.href='../index.html';});
+}
+
+loadAll();
+</script>
+</body>
+</html>

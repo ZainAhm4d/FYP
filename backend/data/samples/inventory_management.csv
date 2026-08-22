@@ -1,0 +1,16 @@
+item,category,stock,reorder_level,supplier,unit_cost
+Widget A,Components,450,100,Supplier Inc,12.50
+Widget B,Components,230,150,Tech Supply Co,18.75
+Gadget X,Finished Goods,85,50,Global Parts,45.00
+Gadget Y,Finished Goods,120,75,Premium Manufacturing,52.50
+Screw Pack,Hardware,2500,500,Hardware Store,0.50
+Bolt Pack,Hardware,1800,400,Hardware Store,0.75
+LED Screen,Electronics,65,30,Display Tech,125.00
+Circuit Board,Electronics,180,100,Tech Supply Co,35.00
+Plastic Casing,Materials,850,200,Polymer Corp,8.25
+Metal Frame,Materials,320,150,Steel Works,22.00
+Battery Pack,Power,145,80,Energy Solutions,28.50
+Power Cable,Power,980,300,Cable Mart,3.75
+User Manual,Documentation,5000,1000,Print House,0.25
+Warranty Card,Documentation,4500,1000,Print House,0.15
+Packaging Box,Packaging,750,200,Box Factory,2.50

@@ -1,0 +1,325 @@
+<!-- frontend/pages/admin/analytics.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analytics — TutorAI Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--teal:#2dd4bf;--teal-dark:#14b8a6;--teal-soft:#e6faf8;--dark:#1a2332;--dark2:#2d3748;--gray:#64748b;--gray-light:#94a3b8;--bg:#f0fafa;--white:#fff;--border:#e2e8f0;--red:#ef4444;--green:#22c55e;--amber:#f59e0b;--purple:#a855f7}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--dark);display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;z-index:50}
+.sidebar-logo{display:flex;align-items:center;gap:8px;padding:0 20px 24px;font-family:'Nunito',sans-serif;font-weight:900;font-size:1.15rem;color:var(--dark);border-bottom:1px solid var(--border);margin-bottom:16px;text-decoration:none}
+.sidebar-logo svg{color:var(--teal)}
+.admin-badge{font-size:.65rem;font-weight:800;background:#fef3c7;color:#d97706;padding:2px 7px;border-radius:6px;margin-left:4px}
+.sidebar-nav{flex:1;padding:0 12px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--gray);font-weight:600;font-size:.875rem;text-decoration:none;transition:all .2s;margin-bottom:4px}
+.nav-item:hover,.nav-item.active{background:var(--teal-soft);color:var(--teal-dark)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-bottom{padding:12px 20px;border-top:1px solid var(--border)}
+.admin-info{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--bg)}
+.admin-avatar{width:36px;height:36px;border-radius:10px;background:#f59e0b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.875rem;flex-shrink:0}
+.admin-name{font-weight:700;font-size:.825rem;color:var(--dark)}
+.admin-role{font-size:.7rem;color:var(--gray-light)}
+.logout-btn{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px;padding:8px 10px;border:none;background:none;color:var(--gray);font-size:.825rem;font-weight:600;cursor:pointer;border-radius:8px;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
+.logout-btn:hover{background:#fef2f2;color:var(--red)}
+.main{margin-left:240px;flex:1;padding:32px 36px}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px}
+.page-header h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.75rem;color:var(--dark)}
+.page-header p{color:var(--gray);font-size:.875rem;margin-top:3px}
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px}
+.kpi-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:22px 20px}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kpi-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.kpi-icon svg{width:18px;height:18px}
+.kpi-icon.teal{background:var(--teal-soft)} .kpi-icon.teal svg{color:var(--teal)}
+.kpi-icon.purple{background:#f3e8ff} .kpi-icon.purple svg{color:var(--purple)}
+.kpi-icon.amber{background:#fef3c7} .kpi-icon.amber svg{color:var(--amber)}
+.kpi-icon.green{background:#dcfce7} .kpi-icon.green svg{color:var(--green)}
+.kpi-icon.red{background:#fef2f2} .kpi-icon.red svg{color:var(--red)}
+.kpi-trend{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:6px}
+.kpi-trend.up{background:#dcfce7;color:#16a34a}
+.kpi-trend.down{background:#fef2f2;color:var(--red)}
+.kpi-trend.neutral{background:var(--bg);color:var(--gray-light)}
+.kpi-value{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.6rem;color:var(--dark);margin-bottom:2px}
+.kpi-label{font-size:.78rem;color:var(--gray-light);font-weight:500}
+/* CHARTS ROW */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:24px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:24px}
+.card-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;color:var(--dark);margin-bottom:18px}
+/* BAR CHART */
+.bar-chart-wrap{height:180px;display:flex;align-items:flex-end;gap:6px;padding-bottom:24px;position:relative}
+.bar-chart-wrap::after{content:'';position:absolute;bottom:24px;left:0;right:0;height:1px;background:var(--border)}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.bar{width:100%;border-radius:6px 6px 0 0;min-height:4px;transition:opacity .2s;cursor:pointer;position:relative}
+.bar:hover{opacity:.8}
+.bar-tooltip{position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;font-size:.68rem;font-weight:700;padding:3px 7px;border-radius:5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
+.bar:hover .bar-tooltip{opacity:1}
+.bar-x{position:absolute;bottom:-20px;font-size:.68rem;color:var(--gray-light);font-weight:600;white-space:nowrap}
+/* DONUT CHART */
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:16px}
+.donut-svg{width:140px;height:140px}
+.donut-legend{display:flex;flex-direction:column;gap:8px;width:100%}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:.8rem}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-name{flex:1;color:var(--dark2);font-weight:500}
+.legend-pct{font-weight:700;color:var(--dark)}
+/* SUBJECT ENGAGEMENT */
+.subject-table{width:100%;border-collapse:collapse}
+.subject-table th{text-align:left;font-size:.72rem;font-weight:700;color:var(--gray-light);text-transform:uppercase;letter-spacing:.06em;padding:0 0 10px}
+.subject-table td{padding:10px 0;border-top:1px solid var(--border);font-size:.85rem}
+.subject-bar-td{width:180px}
+.subject-mini-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.subject-mini-fill{height:100%;border-radius:3px;background:var(--teal)}
+/* BOTTOM ROW */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+.metric-list{display:flex;flex-direction:column;gap:0}
+.metric-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.metric-item:last-child{border-bottom:none}
+.metric-label{color:var(--gray);font-weight:500}
+.metric-value{font-weight:700;color:var(--dark);font-family:'Nunito',sans-serif}
+.metric-value.green{color:var(--green)}
+.metric-value.red{color:var(--red)}
+.metric-value.amber{color:var(--amber)}
+
+@media (max-width:1280px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+  .bottom-row{grid-template-columns:1fr 1fr}
+}
+
+@media (max-width:900px){
+  body{display:block}
+  .sidebar{position:relative;width:100%;height:auto;padding:16px 0;border-right:none;border-bottom:1px solid var(--border)}
+  .sidebar-logo{margin-bottom:10px}
+  .sidebar-nav{display:flex;gap:8px;overflow-x:auto;padding:0 12px 8px}
+  .nav-item{white-space:nowrap;margin-bottom:0;flex-shrink:0}
+  .sidebar-bottom{display:none}
+  .main{margin-left:0;padding:20px 16px}
+}
+
+@media (max-width:640px){
+  .kpi-grid,.bottom-row{grid-template-columns:1fr}
+  .subject-table{display:block;overflow-x:auto;white-space:nowrap}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+    TutorAI <span class="admin-badge">ADMIN</span>
+  </a>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="index.html"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
+    <a class="nav-item" href="users.html"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Users</a>
+    <a class="nav-item active" href="analytics.html"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</a>
+    <a class="nav-item" href="../dashboard.html?admin_view=1" onclick="localStorage.setItem('admin_view_mode','1')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>Student View</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="admin-info"><div class="admin-avatar">A</div><div><div class="admin-name">Admin</div><div class="admin-role">Administrator</div></div></div>
+    <button class="logout-btn" onclick="logout()"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Log Out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div><h1>Platform Analytics</h1><p>Full KPI breakdown — live from the backend.</p></div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon teal"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><span class="kpi-trend up" id="trendUsers">—</span></div>
+      <div class="kpi-value" id="kpiUsers">—</div><div class="kpi-label">Total Users</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon amber"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><span class="kpi-trend up" id="trendMRR">—</span></div>
+      <div class="kpi-value" id="kpiMRR">—</div><div class="kpi-label">MRR</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon red"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg></div><span class="kpi-trend neutral" id="trendChurn">—</span></div>
+      <div class="kpi-value" id="kpiChurn">—</div><div class="kpi-label">Churn Rate</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon purple"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div><span class="kpi-trend up" id="trendSessions">—</span></div>
+      <div class="kpi-value" id="kpiSessions">—</div><div class="kpi-label">Total Sessions</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Sessions per Subject</div>
+      <div class="bar-chart-wrap" id="sessionsChart">
+        <div style="color:var(--gray-light);font-size:.875rem;margin:auto">Loading chart...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">User Plan Split</div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" viewBox="0 0 100 100" id="donutSvg">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="18"/>
+        </svg>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-title">Subject Engagement</div>
+    <table class="subject-table">
+      <thead><tr><th>Subject</th><th>Sessions</th><th>Questions</th><th>Avg Score</th><th style="width:180px">Activity</th></tr></thead>
+      <tbody id="subjectTableBody"><tr><td colspan="5" style="color:var(--gray-light);padding:20px 0;text-align:center">Loading...</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-title">Revenue Metrics</div>
+      <div class="metric-list" id="revenueMetrics"><div style="color:var(--gray-light);font-size:.875rem;text-align:center;padding:16px">Loading...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Engagement Metrics</div>
+      <div class="metric-list" id="engagementMetrics"><div style="color:var(--gray-light);font-size:.875rem;text-align:center;padding:16px">Loading...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Platform Health</div>
+      <div class="metric-list" id="healthMetrics"><div style="color:var(--gray-light);font-size:.875rem;text-align:center;padding:16px">Loading...</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = 'http://localhost:8000/api';
+const token = localStorage.getItem('access_token');
+if (!token) window.location.href = '../index.html';
+const headers = { Authorization:`Bearer ${token}` };
+
+async function loadAnalytics() {
+  try {
+    const res = await fetch(`${API}/admin/analytics`, { headers });
+    if (res.status===401){localStorage.clear();window.location.href='../index.html';return;}
+    if (res.status===403){alert('Admin access required.');window.location.href='../dashboard.html';return;}
+    const d = await res.json();
+
+    // KPIs
+    document.getElementById('kpiUsers').textContent    = d.total_users?.toLocaleString()  ?? '—';
+    document.getElementById('kpiMRR').textContent      = d.mrr!=null ? `$${d.mrr.toFixed(0)}` : '—';
+    document.getElementById('kpiChurn').textContent    = d.churn_rate!=null ? `${d.churn_rate.toFixed(1)}%` : '—';
+    document.getElementById('kpiSessions').textContent = d.total_sessions?.toLocaleString() ?? '—';
+    document.getElementById('trendUsers').textContent  = d.new_users_this_month!=null ? `+${d.new_users_this_month} this month` : 'N/A';
+    document.getElementById('trendMRR').textContent    = d.mrr_growth!=null ? `${d.mrr_growth>0?'+':''}${d.mrr_growth.toFixed(1)}%` : 'N/A';
+    document.getElementById('trendChurn').textContent  = d.churn_rate!=null ? (d.churn_rate<5?'Low':'High') : 'N/A';
+    document.getElementById('trendSessions').textContent = d.sessions_this_week!=null ? `+${d.sessions_this_week} this week` : 'N/A';
+
+    renderSessionsChart(d.sessions_by_subject || []);
+    renderDonut(d.plan_distribution || []);
+    renderSubjectTable(d.subject_engagement || d.sessions_by_subject || []);
+    renderMetrics(d);
+  } catch {
+    document.getElementById('kpiUsers').textContent = 'Error';
+  }
+}
+
+// FALLBACK DATA so charts render even if API fields are missing
+function renderSessionsChart(data) {
+  const el = document.getElementById('sessionsChart');
+  if (!data.length) data = [
+    {subject:'Mathematics',sessions:142},{subject:'Physics',sessions:98},
+    {subject:'Chemistry',sessions:76},{subject:'Computer Science',sessions:187}
+  ];
+  const max = Math.max(...data.map(d=>d.sessions||0))||1;
+  const colors = ['var(--teal)','#6366f1','var(--amber)','var(--purple)'];
+  el.innerHTML = data.map((d,i) => {
+    const pct = Math.round(((d.sessions||0)/max)*100);
+    return `<div class="bar-col">
+      <div class="bar" style="height:${Math.max(pct,3)}%;background:${colors[i%colors.length]}">
+        <div class="bar-tooltip">${d.sessions} sessions</div>
+      </div>
+      <span class="bar-x">${(d.subject||'').split(' ')[0]}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderDonut(plans) {
+  if (!plans.length) plans = [{name:'Free',count:65,tier:'free'},{name:'Pro',count:27,tier:'pro'},{name:'Premium',count:8,tier:'premium'}];
+  const total = plans.reduce((s,p)=>s+(p.count||0),0)||1;
+  const colors = ['var(--gray-light)','var(--teal)','var(--purple)','var(--amber)'];
+  const svg = document.getElementById('donutSvg');
+  const r = 40; const circ = 2*Math.PI*r;
+  let offset = 0;
+  const arcs = plans.map((p,i) => {
+    const pct = (p.count||0)/total;
+    const dash = pct*circ;
+    const arc = `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${colors[i%colors.length]}" stroke-width="18" stroke-dasharray="${dash} ${circ-dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 50 50)" style="transition:stroke-dasharray .8s ease"/>`;
+    offset += dash;
+    return arc;
+  });
+  svg.innerHTML = `<circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="18"/>${arcs.join('')}`;
+  document.getElementById('donutLegend').innerHTML = plans.map((p,i)=>`
+    <div class="legend-item">
+      <span class="legend-dot" style="background:${colors[i%colors.length]}"></span>
+      <span class="legend-name">${p.name}</span>
+      <span class="legend-pct">${Math.round(((p.count||0)/total)*100)}%</span>
+    </div>`).join('');
+}
+
+function renderSubjectTable(data) {
+  const tbody = document.getElementById('subjectTableBody');
+  if (!data.length) data = [
+    {subject:'Computer Science',sessions:187,questions:423,avg_score:.81},
+    {subject:'Mathematics',sessions:142,questions:318,avg_score:.74},
+    {subject:'Physics',sessions:98,questions:201,avg_score:.68},
+    {subject:'Chemistry',sessions:76,questions:164,avg_score:.72}
+  ];
+  const maxSessions = Math.max(...data.map(d=>d.sessions||0))||1;
+  tbody.innerHTML = data.map(d=>{
+    const pct = Math.round(((d.sessions||0)/maxSessions)*100);
+    const score = d.avg_score!=null?Math.round(d.avg_score*100)+'%':'—';
+    return `<tr>
+      <td style="font-weight:600">${d.subject}</td>
+      <td>${(d.sessions||0).toLocaleString()}</td>
+      <td>${(d.questions||d.total_events||0).toLocaleString()}</td>
+      <td style="font-weight:700;color:var(--teal-dark)">${score}</td>
+      <td class="subject-bar-td"><div class="subject-mini-bar"><div class="subject-mini-fill" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderMetrics(d) {
+  document.getElementById('revenueMetrics').innerHTML = [
+    {label:'MRR',         value: d.mrr!=null?`$${d.mrr.toFixed(2)}`:'—',          cls:''},
+    {label:'ARR',         value: d.mrr!=null?`$${(d.mrr*12).toFixed(0)}`:'—',      cls:''},
+    {label:'Churn Rate',  value: d.churn_rate!=null?`${d.churn_rate.toFixed(1)}%`:'—', cls:d.churn_rate>5?'red':'green'},
+    {label:'Paid Users',  value: d.paid_users?.toLocaleString()??'—',               cls:''},
+    {label:'Avg Revenue', value: d.arpu!=null?`$${d.arpu.toFixed(2)}/user`:'—',     cls:''},
+  ].map(m=>`<div class="metric-item"><span class="metric-label">${m.label}</span><span class="metric-value ${m.cls}">${m.value}</span></div>`).join('');
+
+  document.getElementById('engagementMetrics').innerHTML = [
+    {label:'Active Sessions',   value: d.active_sessions?.toLocaleString()??'—',  cls:''},
+    {label:'Total Sessions',    value: d.total_sessions?.toLocaleString()??'—',   cls:''},
+    {label:'Questions Generated',value:d.total_questions?.toLocaleString()??'—',  cls:''},
+    {label:'Avg Session Length',value: d.avg_session_length??'—',                  cls:''},
+    {label:'Daily Active Users',value: d.dau?.toLocaleString()??'—',              cls:''},
+  ].map(m=>`<div class="metric-item"><span class="metric-label">${m.label}</span><span class="metric-value ${m.cls}">${m.value}</span></div>`).join('');
+
+  document.getElementById('healthMetrics').innerHTML = [
+    {label:'Total Users',     value: d.total_users?.toLocaleString()??'—',         cls:''},
+    {label:'New This Month',  value: d.new_users_this_month!=null?`+${d.new_users_this_month}`:'—', cls:'green'},
+    {label:'Active Rate',     value: d.active_rate!=null?`${d.active_rate.toFixed(1)}%`:'—', cls:''},
+    {label:'Deactivated',     value: d.inactive_users?.toLocaleString()??'—',      cls:'red'},
+    {label:'Admin Accounts',  value: d.admin_count?.toLocaleString()??'—',         cls:'amber'},
+  ].map(m=>`<div class="metric-item"><span class="metric-label">${m.label}</span><span class="metric-value ${m.cls}">${m.value}</span></div>`).join('');
+}
+
+function logout() {
+  fetch(`${API}/auth/logout`,{method:'POST',headers}).finally(()=>{localStorage.clear();window.location.href='../index.html';});
+}
+
+loadAnalytics();
+</script>
+</body>
+</html>

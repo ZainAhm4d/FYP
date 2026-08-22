@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Dashboard - BI Dashboard Generator</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="assets/css/tailwind.build.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Plotly.js CDN -->
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+
+    <!-- JSZip — client-side ZIP assembly for PNG export -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+    <!-- GridStack — drag-and-drop dashboard designer -->
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@10.3.1/dist/gridstack-all.js"></script>
+    <style>
+        /* Let widget cards fill their gridstack cell */
+        .grid-stack-item-content { inset: 4px; }
+        .grid-stack-item-content .chart-card { height: 100%; }
+        .grid-stack-item.ui-draggable-dragging .chart-card { box-shadow: 0 12px 32px rgba(79,70,229,.25); }
+        .grid-stack-placeholder > .placeholder-content {
+            background: rgba(99,102,241,.08); border: 2px dashed rgba(99,102,241,.4); border-radius: 12px;
+        }
+    </style>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/tooltips.css">
+    <link rel="stylesheet" href="css/empty-states.css">
+    <link rel="stylesheet" href="css/form-validation.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard-themes.css">
+    <!-- Teal reference-style reskin (recolors indigo/blue -> teal, Nunito/Plus Jakarta Sans fonts) -->
+    <link rel="stylesheet" href="css/teal-theme.css">
+</head>
+<body class="font-['Inter'] bg-gray-50">
+    <!-- Navigation Container -->
+    <div id="navbar-container"></div>
+
+    <!-- Main Content -->
+    <main class="pt-8 px-6 pb-16">
+        <div class="max-w-7xl mx-auto">
+            <!-- Page Header -->
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <a href="saved-dashboards.html" class="text-blue-600 hover:text-blue-700 flex items-center">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Back to Saved Dashboards
+                    </a>
+                </div>
+
+                <!-- No auto-generated title banner here — like PowerBI, the page IS
+                     the canvas below (charts/text/KPI widgets). Add your own title
+                     with a Text widget wherever you want it, instead of a fixed
+                     header showing the dashboard's save-name. -->
+
+                <!-- Full-width toolbar: grouped, uniform, left-aligned -->
+                <div class="dash-toolbar dash-toolbar-bar">
+                        <button id="designBtn" class="btn btn-primary" title="Open the design panel">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                            </svg>
+                            Design
+                        </button>
+                        <button id="refreshBtn" class="btn btn-secondary" title="Re-run every chart's query against the latest data">
+                            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh Data
+                        </button>
+                        <!-- CH-10: change-detection ("Live") is always on and does the real
+                             work; these options only add a blind forced re-run on top. -->
+                        <select id="dashAutoRefresh" class="btn btn-outline"
+                                title="Charts already update automatically when source data changes (Live). These options additionally force a full re-run on a timer — useful only for sources with no live signal.">
+                            <option value="0">Live — updates on change</option>
+                            <option value="300">Live + force re-run: 5 min</option>
+                            <option value="900">Live + force re-run: 15 min</option>
+                            <option value="1800">Live + force re-run: 30 min</option>
+                        </select>
+                        <button id="changeLayoutBtn" class="btn btn-secondary">
+                            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z"></path>
+                            </svg>
+                            Change Layout
+                        </button>
+                        <!-- CH-15: Share hidden from UI (backend /share endpoints intact;
+                             existing links still resolve). Remove 'hidden' to re-enable. -->
+                        <button id="shareBtn" class="hidden btn btn-outline" title="Share dashboard">
+                            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                            </svg>
+                            Share
+                        </button>
+                        <button id="previewDashboardBtn" class="btn btn-outline flex items-center gap-2"
+                                onclick="previewDashboardExport()" title="See how this dashboard will look when exported">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            Preview Dashboard
+                        </button>
+                        <!-- Export dropdown -->
+                        <div class="relative" id="exportDropdownWrapper">
+                            <button id="exportBtn" class="btn btn-outline flex items-center gap-2"
+                                    aria-haspopup="true" aria-expanded="false">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Export
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div id="exportDropdown"
+                                 class="hidden absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-40">
+                                <button class="export-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3"
+                                        data-format="html">
+                                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    <span>
+                                        <span class="font-medium block">Interactive HTML</span>
+                                        <span class="text-xs text-gray-400">Full interactivity — hover, zoom, all pages, offline</span>
+                                    </span>
+                                </button>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <button class="export-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3"
+                                        data-format="pdf">
+                                    <svg class="w-4 h-4 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>
+                                        <span class="font-medium block">PDF Report</span>
+                                        <span class="text-xs text-gray-400">Full report with all charts</span>
+                                    </span>
+                                </button>
+                                <button class="export-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3"
+                                        data-format="png">
+                                    <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>
+                                        <span class="font-medium block">PNG Images</span>
+                                        <span class="text-xs text-gray-400">One PNG per chart (ZIP)</span>
+                                    </span>
+                                </button>
+                                <button class="export-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3"
+                                        data-format="csv">
+                                    <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M3 10h18M3 14h18M10 3v18M14 3v18M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"></path>
+                                    </svg>
+                                    <span>
+                                        <span class="font-medium block">CSV Data</span>
+                                        <span class="text-xs text-gray-400">Chart tables as CSV (ZIP)</span>
+                                    </span>
+                                </button>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <button class="export-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3"
+                                        data-format="json">
+                                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                                    </svg>
+                                    <span>
+                                        <span class="font-medium block">Dashboard File (JSON)</span>
+                                        <span class="text-xs text-gray-400">Re-importable backup — like a .pbix</span>
+                                    </span>
+                                </button>
+                        </div><!-- /exportDropdown -->
+                        </div><!-- /exportDropdownWrapper -->
+
+                        <!-- Theme toggle -->
+                        <button id="themeToggleBtn" class="btn btn-outline flex items-center gap-2" title="Switch light/dark theme">
+                            <svg id="themeIconMoon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                            <span id="themeToggleLabel">Dark</span>
+                        </button>
+
+                        <!-- Add Widget dropdown -->
+                        <div class="relative" id="widgetDropdownWrapper">
+                            <button id="addWidgetBtn" class="btn btn-outline flex items-center gap-2" title="Add a widget to this dashboard">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Add Widget
+                            </button>
+                            <div id="widgetDropdown"
+                                 class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-40">
+                                <button class="widget-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-3" data-widget="kpi">
+                                    <i data-lucide="gauge" style="width:18px;height:18px;color:#0d9488;"></i>
+                                    <span><span class="font-medium block">KPI Card</span>
+                                    <span class="text-xs text-gray-400">Big number from a chart's data</span></span>
+                                </button>
+                                <button class="widget-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-3" data-widget="text">
+                                    <i data-lucide="type" style="width:18px;height:18px;color:#0d9488;"></i>
+                                    <span><span class="font-medium block">Text Block</span>
+                                    <span class="text-xs text-gray-400">Title, notes, or explanation</span></span>
+                                </button>
+                                <button class="widget-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-3" data-widget="divider">
+                                    <i data-lucide="separator-horizontal" style="width:18px;height:18px;color:#0d9488;"></i>
+                                    <span><span class="font-medium block">Section Divider</span>
+                                    <span class="text-xs text-gray-400">Labeled separator line</span></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CH-15: Collaborate hidden from UI (backend collaborations API intact).
+                             Remove 'hidden' to re-enable. -->
+                        <button id="collaborateBtn" class="hidden btn btn-outline items-center gap-2" title="Manage collaborators">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Collaborate
+                        </button>
+
+                        <!-- Schedule Report button -->
+                        <button id="scheduleBtn" class="btn btn-outline flex items-center gap-2" title="Schedule recurring email report">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Schedule
+                        </button>
+
+                </div><!-- /toolbar bar -->
+            </div><!-- /header container -->
+
+            <!-- Dashboard Metadata -->
+            <div class="mb-4 flex items-center gap-4 text-sm text-gray-500">
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+                    </svg>
+                    <span id="chartCount">0 charts</span>
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span id="createdDate">-</span>
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span id="updatedDate">-</span>
+                </div>
+                <!-- Data freshness — when the numbers on screen were last queried -->
+                <span id="dataFreshness"
+                      class="hidden items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200"
+                      title="When the numbers on this dashboard were last pulled from the data. Checked automatically on open and every 10 seconds.">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    <span id="dataFreshnessText"></span>
+                </span>
+            </div>
+
+            <!-- Page tabs -->
+            <div id="pageTabBar" class="dash-tabbar hidden"></div>
+
+            <!-- Dashboard Grid Container -->
+            <div id="dashboardGrid" class="dashboard-grid"></div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="text-center py-20">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+                <p class="text-gray-600 mt-4">Loading dashboard...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="hidden text-center py-20">
+                <svg class="w-24 h-24 mx-auto mb-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-xl font-semibold text-gray-600 mb-2">Failed to Load Dashboard</p>
+                <p id="errorMessage" class="text-gray-500 mb-6"></p>
+                <a href="saved-dashboards.html" class="btn btn-primary inline-flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Dashboards
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Chart Modal -->
+    <div id="editChartModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-xl w-full mx-4 p-6" style="max-height:90vh;overflow-y:auto;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-2xl font-bold text-gray-800">Edit Chart</h3>
+                <button id="closeEditChartModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Chart info -->
+            <div class="mb-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                <span class="font-semibold">Dataset:</span> <span id="editChartDataset">-</span><br>
+                <span class="font-semibold">Template:</span> <span id="editChartTemplate">-</span>
+            </div>
+
+            <form id="editChartForm">
+                <!-- Chart Title -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Chart Title</label>
+                    <input type="text" id="editChartTitle" maxlength="120"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Chart title">
+                </div>
+
+                <!-- Chart Size -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Chart Size</label>
+                    <select id="editChartSize" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="small">Small (1 column)</option>
+                        <option value="medium" selected>Medium (1 column)</option>
+                        <option value="large">Large (2 columns)</option>
+                        <option value="full">Full Width</option>
+                    </select>
+                </div>
+
+                <!-- Chart Color -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <div class="flex items-center gap-2">
+                        <input type="color" id="editChartColor" value="#0d9488"
+                            class="w-10 h-9 border border-gray-300 rounded-lg cursor-pointer bg-white p-0.5">
+                        <span class="text-xs text-gray-400">Pie/stacked/multi-series charts get a light-to-dark gradient from this color.</span>
+                    </div>
+                </div>
+
+                <!-- Page assignment -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Page</label>
+                    <select id="editChartPage" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+                </div>
+
+                <!-- Re-run query section -->
+                <div class="border-t border-gray-200 pt-4 mb-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                        Re-run Query
+                        <span class="ml-1 text-xs font-normal text-gray-400">(optional — updates chart data)</span>
+                    </h4>
+                    <div id="editChartParams" class="space-y-3">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" id="cancelEditChartBtn" class="btn btn-outline flex-1">Cancel</button>
+                    <button type="submit" id="confirmEditChartBtn" class="btn btn-primary flex-1">Save Chart</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 p-7">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Share Dashboard</h3>
+                </div>
+                <button id="closeShareModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Not shared yet state -->
+            <div id="shareNotSharedState">
+                <p class="text-gray-600 mb-5">Anyone with the link can view this dashboard in read-only mode — no login required.</p>
+                <button id="generateShareLinkBtn" class="btn btn-primary w-full">
+                    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
+                    Generate Share Link
+                </button>
+            </div>
+
+            <!-- Shared state -->
+            <div id="shareActiveState" class="hidden">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-2.5 h-2.5 bg-green-500 rounded-full inline-block"></span>
+                    <span class="text-sm font-semibold text-green-700">Sharing active</span>
+                    <span id="shareViewCount" class="ml-auto text-xs text-gray-500"></span>
+                </div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-1">Share link</label>
+                <div class="flex gap-2 mb-5">
+                    <input id="shareLinkInput" type="text" readonly
+                        class="flex-1 border border-gray-200 rounded-lg px-3 py-2 bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <button id="copyShareLinkBtn" class="btn btn-secondary text-sm px-4">
+                        Copy
+                    </button>
+                </div>
+
+                <div class="border-t border-gray-100 pt-4">
+                    <button id="revokeShareBtn" class="text-sm text-red-600 hover:text-red-700 hover:underline font-medium">
+                        Revoke link (make private)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layout Selection Modal -->
+    <div id="layoutModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Choose Layout</h3>
+                <button id="closeLayoutModalBtn" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="grid">
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Grid (Auto)</p>
+                </button>
+                
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="1-col">
+                    <div class="flex flex-col gap-2 mb-3">
+                        <div class="bg-gray-300 h-8 rounded"></div>
+                        <div class="bg-gray-300 h-8 rounded"></div>
+                        <div class="bg-gray-300 h-8 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Single Column</p>
+                </button>
+                
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="2-col">
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Two Columns</p>
+                </button>
+                
+                <button class="layout-option p-4 border-2 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition" data-layout="3-col">
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                        <div class="bg-gray-300 h-12 rounded"></div>
+                    </div>
+                    <p class="font-semibold text-center">Three Columns</p>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-6 text-center text-gray-600">
+            <p>© 2024 BI Dashboard Generator. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils/validation.js"></script>
+    <script src="js/components/skeleton-loader.js"></script>
+    <script src="js/components/tooltip.js"></script>
+    <script src="js/components/empty-states.js"></script>
+    <script src="js/components/notifications.js"></script>
+    <script src="js/components/navbar.js"></script>
+    <script src="js/components/loading.js"></script>
+    
+    <!-- Visualization Modules -->
+    <script src="js/visualization/chart-renderer.js"></script>
+    <script src="js/visualization/dashboard-layout.js"></script>
+    
+    <!-- View Dashboard Page Logic -->
+    <script src="js/pages/view-dashboard.js"></script>
+    
+    <script>
+        Auth.requireAuth();
+        Navbar.init('saved');
+    </script>
+
+    <!-- ── Design Side Panel (dashboard-level theming) ──────────────────── -->
+    <div id="designPanel"
+         class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl border-l border-gray-200 z-50
+                transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="bg-gradient-to-r from-indigo-600 to-indigo-600 px-5 py-4 flex items-center justify-between flex-shrink-0">
+            <h2 class="text-white font-bold">Dashboard Design</h2>
+            <!-- CH-14: obvious close control (also: Esc, backdrop click, Done) -->
+            <button id="closeDesignPanel" title="Close design panel (Esc)"
+                    class="text-white bg-white/10 hover:bg-white/25 rounded-lg p-1.5 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-5 space-y-6">
+
+            <!-- Canvas -->
+            <div>
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Canvas</h3>
+                <div class="flex items-center gap-3">
+                    <label class="text-xs text-gray-500 flex-1">Background
+                        <input type="color" id="dzCanvasBg" value="#f9fafb" class="mt-1 w-full h-9 border border-gray-200 rounded-lg cursor-pointer p-0.5 bg-white">
+                    </label>
+                    <button id="dzCanvasReset" class="text-xs text-indigo-600 hover:underline self-end pb-2">reset</button>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="border-t border-gray-100 pt-5">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Widget Cards</h3>
+                <label class="text-xs text-gray-500 block mb-3">Card background
+                    <input type="color" id="dzCardBg" value="#ffffff" class="mt-1 w-full h-9 border border-gray-200 rounded-lg cursor-pointer p-0.5 bg-white">
+                </label>
+                <label class="text-xs text-gray-500 block mb-3">Corner roundness
+                    <input type="range" id="dzCardRadius" min="0" max="24" value="12" class="mt-1 w-full accent-indigo-600">
+                </label>
+                <label class="flex items-center justify-between mb-2 cursor-pointer">
+                    <span class="text-sm text-gray-700">Drop shadow</span>
+                    <input type="checkbox" id="dzCardShadow" checked class="w-4 h-4 accent-indigo-600">
+                </label>
+                <label class="flex items-center justify-between cursor-pointer">
+                    <span class="text-sm text-gray-700">Thin border</span>
+                    <input type="checkbox" id="dzCardBorder" class="w-4 h-4 accent-indigo-600">
+                </label>
+            </div>
+
+            <!-- Colors -->
+            <div class="border-t border-gray-100 pt-5">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Colors</h3>
+                <label class="text-xs text-gray-500 block mb-3">Accent (KPI numbers)
+                    <input type="color" id="dzAccent" value="#0d9488" class="mt-1 w-full h-9 border border-gray-200 rounded-lg cursor-pointer p-0.5 bg-white">
+                </label>
+                <label class="text-xs text-gray-500 block">Chart color palette
+                    <select id="dzPalette" class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                        <option value="default">Original chart colors</option>
+                        <option value="indigo">Indigo &amp; Violet</option>
+                        <option value="ocean">Ocean Blues</option>
+                        <option value="forest">Forest Greens</option>
+                        <option value="sunset">Sunset Warm</option>
+                        <option value="corporate">Corporate Blue</option>
+                    </select>
+                </label>
+                <div id="dzPalettePreview" class="flex gap-1 mt-2"></div>
+            </div>
+
+        </div>
+
+        <div class="p-4 border-t border-gray-100 flex-shrink-0 space-y-2">
+            <button id="designDoneBtn" class="w-full py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors">
+                Done
+            </button>
+            <button id="dzReset" class="w-full py-2 text-sm font-semibold text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">
+                Reset all design settings
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Widget Format Modal ───────────────────────────────────────────── -->
+    <div id="widgetFormatModal"
+         class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                <h2 class="text-white font-bold text-lg">Format Widget</h2>
+                <button id="closeFormatModal" class="text-white/70 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Card appearance (all widget types) -->
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">Card background &amp; border</span>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="fmtFrame" checked class="w-4 h-4 accent-indigo-600">
+                        <span class="ml-2 text-xs text-gray-500">show</span>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">Title bar</span>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="fmtTitle" checked class="w-4 h-4 accent-indigo-600">
+                        <span class="ml-2 text-xs text-gray-500">show</span>
+                    </label>
+                </div>
+
+                <!-- Text styling (text widgets) -->
+                <div id="fmtTextSection" class="hidden space-y-3 border-t border-gray-100 pt-4">
+                    <div class="flex items-center gap-2">
+                        <select id="fmtFontSize" class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm bg-white flex-1">
+                            <option value="sm">Small</option>
+                            <option value="base" selected>Normal</option>
+                            <option value="lg">Large</option>
+                            <option value="xl">Heading</option>
+                        </select>
+                        <button id="fmtBold" class="w-9 h-9 border border-gray-300 rounded-lg font-black text-sm hover:bg-gray-50" title="Bold">B</button>
+                        <button id="fmtItalic" class="w-9 h-9 border border-gray-300 rounded-lg italic font-serif text-sm hover:bg-gray-50" title="Italic">I</button>
+                        <input type="color" id="fmtTextColor" value="#4b5563"
+                               class="w-9 h-9 border border-gray-300 rounded-lg cursor-pointer p-0.5 bg-white" title="Text color">
+                    </div>
+                    <div class="flex gap-1">
+                        <button data-align="left"   class="fmt-align flex-1 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50">Left</button>
+                        <button data-align="center" class="fmt-align flex-1 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50">Center</button>
+                        <button data-align="right"  class="fmt-align flex-1 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold hover:bg-gray-50">Right</button>
+                    </div>
+                </div>
+
+                <!-- KPI formatting (kpi widgets) -->
+                <div id="fmtKpiSection" class="hidden border-t border-gray-100 pt-4 space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Title</label>
+                        <input type="text" id="fmtKpiTitle" maxlength="60" placeholder="KPI"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Title size</label>
+                            <select id="fmtKpiTitleSize" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="sm" selected>Small</option>
+                                <option value="base">Medium</option>
+                                <option value="lg">Large</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Title color</label>
+                            <input type="color" id="fmtKpiTitleColor" value="#6b7280"
+                                   class="w-full h-9 border border-gray-300 rounded-lg cursor-pointer p-0.5 bg-white">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-gray-700">Number color</span>
+                        <input type="color" id="fmtAccent" value="#0d9488"
+                               class="w-9 h-9 border border-gray-300 rounded-lg cursor-pointer p-0.5 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Number size</label>
+                        <select id="fmtKpiSize" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="sm">Small</option>
+                            <option value="base" selected>Medium</option>
+                            <option value="lg">Large</option>
+                            <option value="xl">Extra Large</option>
+                        </select>
+                    </div>
+                    <label class="flex items-center justify-between cursor-pointer">
+                        <span class="text-sm font-semibold text-gray-700">Show label under number</span>
+                        <input type="checkbox" id="fmtKpiShowSub" class="w-4 h-4 accent-indigo-600" checked>
+                    </label>
+                </div>
+
+                <button id="fmtApplyBtn"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700
+                           text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow">
+                    Apply Formatting
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Add Widget Modal ──────────────────────────────────────────────── -->
+    <div id="widgetModal"
+         class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 flex items-center justify-between">
+                <h2 id="widgetModalTitle" class="text-white font-bold text-lg">Add Widget</h2>
+                <button id="closeWidgetModal" class="text-white/70 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5" id="widgetTitleLabel">Title</label>
+                    <input type="text" id="widgetTitleInput" maxlength="80"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm
+                               focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                        placeholder="e.g. Revenue Overview">
+                </div>
+
+                <!-- Text widget only -->
+                <div id="widgetBodyWrap" class="hidden">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Text</label>
+                    <textarea id="widgetBodyInput" rows="4"
+                        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm
+                               focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                        placeholder="Notes, context, or explanation… (**bold** supported)"></textarea>
+                </div>
+
+                <!-- KPI widget only -->
+                <div id="widgetKpiWrap" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Data source (chart on this dashboard)</label>
+                        <select id="widgetKpiSource"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white
+                                   focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Aggregation</label>
+                        <select id="widgetKpiAgg"
+                            class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white
+                                   focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="sum">Sum</option>
+                            <option value="avg">Average</option>
+                            <option value="max">Maximum</option>
+                            <option value="min">Minimum</option>
+                            <option value="last">Latest value</option>
+                            <option value="count">Count of rows</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="widgetCreateBtn"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700
+                           text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow hover:shadow-md">
+                    Add to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Collaborators Modal ───────────────────────────────────────────── -->
+    <div id="collaborateModal"
+         class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <h2 class="text-white font-bold text-lg">Manage Collaborators</h2>
+                </div>
+                <button id="closeCollaborateModal" class="text-white/70 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-6">
+
+                <!-- Invite form -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Invite a User</h3>
+                    <div class="flex gap-2">
+                        <input type="email" id="collaborateEmail"
+                            class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm
+                                   focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                            placeholder="colleague@example.com">
+                        <select id="collaborateRole"
+                            class="border border-gray-300 rounded-xl px-3 py-2.5 text-sm
+                                   focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                            <option value="viewer">Viewer</option>
+                            <option value="editor">Editor</option>
+                        </select>
+                        <button id="inviteCollaboratorBtn"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold
+                                   px-4 py-2.5 rounded-xl text-sm transition-all whitespace-nowrap">
+                            Invite
+                        </button>
+                    </div>
+                    <p class="mt-1.5 text-xs text-gray-400">
+                        <strong>Viewer</strong> — read-only · <strong>Editor</strong> — can modify charts and layout
+                    </p>
+                </div>
+
+                <!-- Current collaborators -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Current Collaborators</h3>
+                    <div id="collaboratorsList" class="space-y-2 max-h-60 overflow-y-auto">
+                        <p class="text-sm text-gray-400">Loading…</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Schedule Report Modal ──────────────────────────────────────────── -->
+    <div id="scheduleModal"
+         class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+
+            <!-- Modal header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <h2 class="text-white font-bold text-lg">Schedule Email Report</h2>
+                </div>
+                <button id="closeScheduleModal"
+                        class="text-white/70 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="p-6 space-y-5">
+
+                <!-- New schedule form -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">New Schedule</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                Recipient Email <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="scheduleEmail"
+                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm
+                                       focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Frequency</label>
+                            <div class="flex gap-2">
+                                <label class="freq-option flex-1">
+                                    <input type="radio" name="scheduleFreq" value="daily" class="sr-only">
+                                    <span class="block text-center border-2 border-gray-200 rounded-xl py-2.5 text-sm font-semibold cursor-pointer hover:border-blue-400 transition-colors">
+                                        Daily
+                                    </span>
+                                </label>
+                                <label class="freq-option flex-1">
+                                    <input type="radio" name="scheduleFreq" value="weekly" class="sr-only" checked>
+                                    <span class="block text-center border-2 border-blue-500 bg-blue-50 text-blue-700 rounded-xl py-2.5 text-sm font-semibold cursor-pointer transition-colors">
+                                        Weekly
+                                    </span>
+                                </label>
+                                <label class="freq-option flex-1">
+                                    <input type="radio" name="scheduleFreq" value="monthly" class="sr-only">
+                                    <span class="block text-center border-2 border-gray-200 rounded-xl py-2.5 text-sm font-semibold cursor-pointer hover:border-blue-400 transition-colors">
+                                        Monthly
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Time / day / timezone pickers -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Send at</label>
+                                <input type="time" id="scheduleTime" value="08:00"
+                                    class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm
+                                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Timezone</label>
+                                <select id="scheduleTimezone"
+                                    class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white
+                                           focus:ring-2 focus:ring-blue-500 outline-none">
+                                </select>
+                            </div>
+                        </div>
+                        <div id="scheduleDowWrap" class="hidden">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Day of week</label>
+                            <select id="scheduleDow"
+                                class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white
+                                       focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="0">Monday</option><option value="1">Tuesday</option>
+                                <option value="2">Wednesday</option><option value="3">Thursday</option>
+                                <option value="4">Friday</option><option value="5">Saturday</option>
+                                <option value="6">Sunday</option>
+                            </select>
+                        </div>
+                        <div id="scheduleDomWrap" class="hidden">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Day of month</label>
+                            <!-- Real, navigable calendar — browse any month/year like a normal date
+                                 picker; each month shows its true day count and weekday alignment.
+                                 Every day 1-31 is selectable; if the picked day doesn't exist in a
+                                 given month, the report fires on that month's last day instead. -->
+                            <select id="scheduleDom" class="hidden"></select>
+                            <div class="flex items-center justify-between mb-2">
+                                <button type="button" id="scheduleDomPrevBtn" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500" title="Previous month">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <p id="scheduleDomMonthLabel" class="text-sm font-semibold text-gray-700"></p>
+                                <button type="button" id="scheduleDomNextBtn" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500" title="Next month">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+                            <div id="scheduleDomGrid" class="grid grid-cols-7 gap-1"></div>
+                            <p class="text-xs text-gray-400 mt-1">If a picked day doesn't exist in a shorter month (e.g. the 31st in April), the report fires on that month's last day instead.</p>
+                        </div>
+                        <!-- CH-16: live "when will it actually fire" confirmation -->
+                        <p id="scheduleNextRun"
+                           class="hidden text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5"></p>
+                        <div class="flex gap-2">
+                            <button id="saveScheduleBtn"
+                                class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600
+                                       hover:from-blue-700 hover:to-indigo-700 text-white font-semibold
+                                       py-2.5 px-4 rounded-xl text-sm transition-all shadow hover:shadow-md">
+                                Save Schedule
+                            </button>
+                            <button id="sendNowBtn"
+                                class="flex-1 border-2 border-blue-600 text-blue-600 hover:bg-blue-50
+                                       font-semibold py-2.5 px-4 rounded-xl text-sm transition-all">
+                                Send Test Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status message -->
+                <div id="scheduleStatus" class="hidden"></div>
+
+                <!-- Existing schedules -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Active Schedules</h3>
+                    <div id="scheduleList" class="space-y-2">
+                        <p class="text-sm text-gray-400">Loading…</p>
+                    </div>
+                </div>
+
+                <!-- Inline delete confirmation (replaces window.confirm) -->
+                <div id="deleteConfirmBanner"
+                     class="hidden items-center justify-between bg-red-50 border border-red-200
+                            rounded-xl px-4 py-3 text-sm gap-3">
+                    <span class="text-red-700 font-medium flex-1">Remove this schedule?</span>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button id="deleteCancelBtn"
+                                class="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600
+                                       hover:bg-gray-100 text-xs font-semibold transition-colors">
+                            Cancel
+                        </button>
+                        <button id="deleteConfirmBtn"
+                                class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white
+                                       text-xs font-semibold transition-colors">
+                            Yes, Delete
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        function renderIcons() { if (window.lucide) { try { lucide.createIcons(); } catch (_) {} } }
+        let t = null;
+        window.addEventListener('DOMContentLoaded', () => {
+            renderIcons();
+            new MutationObserver(() => { clearTimeout(t); t = setTimeout(renderIcons, 80); })
+                .observe(document.body, { childList: true, subtree: true });
+        });
+    })();
+    </script>
+</body>
+</html>
