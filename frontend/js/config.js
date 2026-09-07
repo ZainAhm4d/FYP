@@ -9,7 +9,7 @@
 // by hostname at page-load time. Local dev needs no changes; PRODUCTION_API_URL
 // is the one line to edit after deploying the backend (Render/Railway).
 // ✅ reads from env variable
-const API_URL = import.meta.env.VITE_API_URL
+const PRODUCTION_API_URL = 'https://fyp-production-8f62.up.railway.app';
 const _isLocalHost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
 const _API_BASE_URL = _isLocalHost ? 'http://localhost:8000' : PRODUCTION_API_URL;
 
