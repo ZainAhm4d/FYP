@@ -72,10 +72,11 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configure CORS
+# Configure CORS — local-dev defaults plus any production origin(s) set via
+# the CORS_ORIGINS env var (see core/config.py).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=settings.cors_origins_effective,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

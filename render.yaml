@@ -1,0 +1,67 @@
+# Render Blueprint — deploys the FastAPI backend as a Web Service.
+# https://render.com/docs/blueprint-spec
+#
+# Usage: on render.com, New -> Blueprint -> point at this repo. Render reads
+# this file automatically. Only the backend is defined here — the frontend
+# is a static site and deploys separately to Vercel (see frontend/vercel.json
+# and DEPLOYMENT.md).
+#
+# Secrets (DATABASE_URL, SECRET_KEY, OPENROUTER_API_KEY, etc.) are marked
+# `sync: false` below so Render prompts for them in the dashboard instead of
+# storing them in this file — never commit real secret values here.
+
+services:
+  - type: web
+    name: bi-dashboard-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    region: oregon            # pick the region closest to your Supabase project
+    branch: main
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+
+      # ── Required ────────────────────────────────────────────────────────
+      - key: SECRET_KEY
+        sync: false            # generate with: python -c "import secrets; print(secrets.token_hex(32))"
+      - key: DATABASE_URL
+        sync: false            # Supabase Postgres connection string — see backend/.env.example
+
+      # ── CORS — set to your Vercel frontend URL(s) once deployed ─────────
+      - key: CORS_ORIGINS
+        sync: false            # e.g. https://your-app.vercel.app,https://your-app-git-main.vercel.app
+
+      # ── Optional: natural-language / AI chat features ────────────────────
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEYS
+        sync: false
+
+      # ── Optional: scheduled email reports ────────────────────────────────
+      - key: RESEND_API_KEY
+        sync: false
+      - key: REPORT_FROM_EMAIL
+        sync: false
+
+      # ── Optional: admin portal seed ──────────────────────────────────────
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+    # NOTE — Render's free tier has an EPHEMERAL filesystem: anything written
+    # to disk (uploaded files in data/uploads/, cleaned Parquet in
+    # data/processed/) is wiped on every redeploy and on every spin-down/
+    # spin-up cycle (free services sleep after 15 min idle). This is fine for
+    # a demo where you upload fresh data each time, but NOT durable storage.
+    # See DEPLOYMENT.md "File storage is not persistent" for the real fix
+    # (a paid Render persistent disk, a Railway volume, or moving to object
+    # storage) before relying on this for real data.
+    disk:
+      name: bi-dashboard-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1                # ignored on the free plan — persistent disks require a paid instance

@@ -3,9 +3,19 @@
  * Centralized configuration for API endpoints and app settings
  */
 
+// ── API base URL ────────────────────────────────────────────────────────────
+// This is a static, no-build site (deployed as-is to Vercel), so there's no
+// build step to inject an environment variable — instead, the URL is picked
+// by hostname at page-load time. Local dev needs no changes; PRODUCTION_API_URL
+// is the one line to edit after deploying the backend (Render/Railway).
+const PRODUCTION_API_URL = 'https://your-backend.onrender.com'; // <-- EDIT AFTER DEPLOYING THE BACKEND
+
+const _isLocalHost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+const _API_BASE_URL = _isLocalHost ? 'http://localhost:8000' : PRODUCTION_API_URL;
+
 const CONFIG = {
-    // API Base URL
-    API_BASE_URL: 'http://localhost:8000',
+    // API Base URL — auto-detected (see PRODUCTION_API_URL above)
+    API_BASE_URL: _API_BASE_URL,
     API_V1: '/api/v1',
     
     // Storage Keys
